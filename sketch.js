@@ -174,7 +174,7 @@ function draw() {
   }
   background(255);
   draw_tree_right(1, (depthL/depthR) * (width/2), height/2, 2, root);
-  tW=mouseX/2 + 40;
-  tH=mouseY/2 + 40;
+  //tW=mouseX/2 + 40;
+  //tH=mouseY/2 + 40;
 } 
 
