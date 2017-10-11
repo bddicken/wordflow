@@ -15,7 +15,7 @@ var firstDraw = true;
 
 // The word to generate graph for
 // Eventually, this should be replaced with a user-input value
-var graphWord = 'person';
+var graphWord = 'Lord';
 
 
 /**
@@ -64,7 +64,7 @@ function preload() {
  * Basic setup
  */
 function setup() {
-  createCanvas(620, 400);  
+  createCanvas(620, 1000);  
   stroke(55);
   frameRate(30);
 }
@@ -82,42 +82,44 @@ function process_data(data) {
       newData.push(splitted[j]);
     }
   }
+  print(newData);
   return newData;
+}
+  
+function get_node_h(tl, bl) {
+  return tl + ((bl - tl)/2.0);
 }
 
 /**
  * Recursive function to draw the tree
  */
-function draw_tree_right(depth, w, h, direction, node) {
+function draw_tree_right(depth, top_limit, bot_limit, w, node) {
 
   if (node == undefined) { return; }
 
-  // base-cases
-  if (w > width) { return; }
-  if (h > height) { return; }
-  if (h < 0) { return; }
-
-  // 2= both, 1= up, 0 = down
-  if (direction == 2 || direction == 1) { line(w, h, w+tW, h+tH); }
-  if (direction == 2 || direction == 0) { line(w, h, w+tW, h-tH); }
-
-  // draw the nodes
-  print(w + ' ' + h + ' wh');
-  fill(250, 200, 200, 100);
+  // draw the node
+  noStroke();
+  fill(200, 250, 200, 200);
+  var h = get_node_h(top_limit, bot_limit);
+  //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
+  //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
   ellipse(w, h, 20, 20);
   fill(0, 0, 0, 255);
   text(node.phrase, w, h);
 
+  var nc = node.children.length;
+
   if (node!= undefined && node.children != undefined && node.children.length > 0) {
     for (var i = 0; i < node.children.length; i++) {
-      draw_tree_right(depth+1, w+tW, h+tH, 1, node.children[i]);
-      draw_tree_right(depth+1, w+tW, h+tH, 0, node.children[i]);
+      var size = ((bot_limit - top_limit) / nc);
+      var nbl = top_limit + (size * (i+1));
+      var ntl = top_limit + (size * i);
+      strokeWeight(3);
+      stroke(100, 100, 200, 150);
+      line(w, h, w+70, get_node_h(ntl, nbl));
+      draw_tree_right(depth+1, ntl, nbl, w + 70, node.children[i]);
     }
   }
-
-  // recurse
-  //draw_tree_right(depth+1, w+tW, h+tH, 1);
-  //draw_tree_right(depth+1, w+tW, h-tH, 0);
 }
   
 var root = undefined;
@@ -173,7 +175,7 @@ function draw() {
     root.print(1, root);
   }
   background(255);
-  draw_tree_right(1, (depthL/depthR) * (width/2), height/2, 2, root);
+  draw_tree_right(1, 0, height, 20, root);
   //tW=mouseX/2 + 40;
   //tH=mouseY/2 + 40;
 } 
