@@ -1,11 +1,6 @@
-
 // The left/right depths of the word flow graph
 var depthL = 1;
 var depthR = 6;
-
-// The width and height of separation between graph/tree nodes
-var tW = 30;
-var tH = 20;
 
 // Where the taxt data is read in and stored
 var result;
@@ -17,6 +12,8 @@ var firstDraw = true;
 // Eventually, this should be replaced with a user-input value
 var graphWord = 'Lord';
 
+// Word input
+var input, button, greeting;
 
 /**
  * GN is the "Graph-Node" class
@@ -61,15 +58,6 @@ function preload() {
 }
 
 /**
- * Basic setup
- */
-function setup() {
-  createCanvas(620, 1000);  
-  stroke(55);
-  frameRate(30);
-}
-
-/**
  * Used to process the text file read in
  * TODO: More advanced processing
  */
@@ -93,19 +81,38 @@ function get_node_h(tl, bl) {
 /**
  * Recursive function to draw the tree
  */
-function draw_tree_right(depth, top_limit, bot_limit, w, node) {
+function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y) {
 
   if (node == undefined) { return; }
 
-  // draw the node
-  noStroke();
-  fill(200, 250, 200, 200);
   var h = get_node_h(top_limit, bot_limit);
+  
+  // draw connector
+  if (depth != 1) {
+    strokeWeight(3);
+    stroke(50, 50, 50, 150);
+    line(w, h, prev_x+60, prev_y);
+  }
+  
+  // draw the node
+  stroke(0);
+  strokeWeight(1);
+  fill(200, 230, 255, 255);
+  rect(w, h-10, 60, 20);
+  fill(0, 0, 0, 255);
+  noStroke();
+  tw = textWidth(node.phrase);
+  text(node.phrase, w+(tw/2.0)+2, h+4);
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
-  ellipse(w, h, 20, 20);
-  fill(0, 0, 0, 255);
-  text(node.phrase, w, h);
+  noStroke();
+
+  // handle button press
+  //if (mousePressed) {
+  //  if (mouseX > w && mouseX < w+20 && mouseY > h-10 && mouseY < h+10) {
+  //    graphWord = node.phrase;
+  //  }
+  //} 
 
   var nc = node.children.length;
 
@@ -114,10 +121,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node) {
       var size = ((bot_limit - top_limit) / nc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      strokeWeight(3);
-      stroke(100, 100, 200, 150);
-      line(w, h, w+70, get_node_h(ntl, nbl));
-      draw_tree_right(depth+1, ntl, nbl, w + 70, node.children[i]);
+      draw_tree_right(depth+1, ntl, nbl, w + 110, node.children[i], w, h);
     }
   }
 }
@@ -163,20 +167,51 @@ function build_graph_for_word(word, data) {
 }
 
 /**
+ * Basic setup
+ */
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  stroke(55);
+  frameRate(30);
+  
+  // Input word button
+  textSize(12);
+  input = createInput();
+  input.position(10, 50);
+  button = createButton('update');
+  button.position(input.x + input.width, 50);
+  button.mousePressed(updateWordSearch);
+  greeting = createElement('h3', 'Graph Word:');
+  greeting.position(10, 5);
+  textAlign(CENTER);
+  textSize(12);
+}
+
+function buildData() {
+    var nd = process_data(result);
+    root = build_graph_for_word(graphWord, nd);
+}
+
+/**
  * The primary animation loop
  */
 function draw() { 
-
+  background(220, 220, 220);
   if (firstDraw) {
     firstDraw = false;
-    var nd = process_data(result);
-    root = build_graph_for_word(graphWord, nd);
-    print('---');
-    root.print(1, root);
+    buildData();
   }
-  background(255);
-  draw_tree_right(1, 0, height, 20, root);
-  //tW=mouseX/2 + 40;
-  //tH=mouseY/2 + 40;
+  draw_tree_right(1, 0, height, 150, root, 20, height/2);
 } 
 
+function updateWordSearch() {
+  graphWord = input.value();;
+  buildData();
+}
+
+/**
+ * Whenever the browser window is resizes, the canvas is resized to fit
+ */
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
