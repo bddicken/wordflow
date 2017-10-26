@@ -1,6 +1,5 @@
-// The left/right depths of the word flow graph
-var depthL = 1;
-var depthR = 6;
+// The depth of the word flow graph
+var depthLimit = 4;
 
 // Where the taxt data is read in and stored
 var result;
@@ -14,6 +13,8 @@ var graphWord = 'Lord';
 
 // Word input
 var input, button, greeting;
+// Depth limit input
+var inputDepth, buttonDepth, greetingDepth;
 
 /**
  * GN is the "Graph-Node" class
@@ -81,17 +82,23 @@ function get_node_h(tl, bl) {
 /**
  * Recursive function to draw the tree
  */
-function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y) {
+function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
 
   if (node == undefined) { return; }
 
   var h = get_node_h(top_limit, bot_limit);
+  var tw = textWidth(node.phrase);
   
   // draw connector
   if (depth != 1) {
     strokeWeight(3);
     stroke(50, 50, 50, 150);
-    line(w, h, prev_x+60, prev_y);
+    if (change > 0) {
+        line(w, h, prev_x+60, prev_y);
+    } else {
+        line(w+60, h, prev_x, prev_y);
+
+    }
   }
   
   // draw the node
@@ -101,7 +108,6 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y) {
   rect(w, h-10, 60, 20);
   fill(0, 0, 0, 255);
   noStroke();
-  tw = textWidth(node.phrase);
   text(node.phrase, w+(tw/2.0)+2, h+4);
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
@@ -121,21 +127,23 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y) {
       var size = ((bot_limit - top_limit) / nc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      draw_tree_right(depth+1, ntl, nbl, w + 110, node.children[i], w, h);
+      draw_tree_right(depth+1, ntl, nbl, w + change, node.children[i], w, h, change);
     }
   }
 }
   
-var root = undefined;
+var f_root = undefined;
+var b_root = undefined;
 
-function build_graph_for_recursive(word, data, index, depth, graph) {
+function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   
   // recursive base-cases
-  if (depth > 4) { return; }
-  if (data.length <= index+1) { return; }
+  if (depth >= depthLimit) { return; }
+  if (data.length <= index+increment) { return; }
+  if (0 > index+increment) { return; }
 
   // find existing or create new node and add to graph
-  var nw = data[index+1];
+  var nw = data[index+increment];
   var nn = undefined;
   for (var i = 0; i < graph.children.length; i++) {
     if (graph.children[i].phrase == nw) {
@@ -148,20 +156,20 @@ function build_graph_for_recursive(word, data, index, depth, graph) {
   }
 
   // recurse
-  build_graph_for_recursive(nn.phrase, data, index + 1, depth + 1, nn);
+  build_graph_for_recursive(nn.phrase, data, index+increment, depth + 1, nn, increment);
 }
 
 /**
  * graph is an out-param
  */
-function build_graph_for_word(word, data) {
+function build_graph_for_word(word, data, increment) {
   var matching_indexes = [];
   for (var i = 0 ; i < data.length ; i++) {
     if (data[i] == word) { matching_indexes.push(i); }
   }
-  root = new GN(undefined, word, 3);
+  var root = new GN(undefined, word, 3);
   for (var i = 0 ; i < matching_indexes.length ; i++) {
-    build_graph_for_recursive(word, data, matching_indexes[i], 0, root);
+    build_graph_for_recursive(word, data, matching_indexes[i], 0, root, increment);
   }
   return root;
 }
@@ -170,7 +178,8 @@ function build_graph_for_word(word, data) {
  * Basic setup
  */
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  var cnv = createCanvas(windowWidth-200, windowHeight);
+  cnv.position(200, 0);
   stroke(55);
   frameRate(30);
   
@@ -184,12 +193,26 @@ function setup() {
   greeting = createElement('h3', 'Graph Word:');
   greeting.position(10, 5);
   textAlign(CENTER);
+  
+  // Depth limit button
   textSize(12);
+  inputDepth = createInput();
+  inputDepth.position(10, 150);
+  buttonDepth = createButton('update');
+  buttonDepth.position(input.x + input.width, 150);
+  buttonDepth.mousePressed(updateWordSearch);
+  greetingDepth = createElement('h3', 'Max Depth');
+  greetingDepth.position(10, 105);
+  textAlign(CENTER);
 }
 
 function buildData() {
-    var nd = process_data(result);
-    root = build_graph_for_word(graphWord, nd);
+  var nd = process_data(result);
+  f_root = build_graph_for_word(graphWord, nd, 1);
+  b_root = build_graph_for_word(graphWord, nd, -1);
+  //f_root.print(1, f_root);
+  //print("-----\n");
+  //b_root.print(1, b_root);
 }
 
 /**
@@ -201,17 +224,19 @@ function draw() {
     firstDraw = false;
     buildData();
   }
-  draw_tree_right(1, 0, height, 150, root, 20, height/2);
+  draw_tree_right(1, 0, height, width/2, f_root, 20, height/2, 110);
+  draw_tree_right(1, 0, height, width/2, b_root, 20, height/2, -110);
 } 
 
 function updateWordSearch() {
-  graphWord = input.value();;
+  graphWord = input.value();
+  depthLimit = int(inputDepth.value());
   buildData();
 }
 
 /**
- * Whenever the browser window is resizes, the canvas is resized to fit
+ * Whenever the browser window is resized, the canvas is resized to fit
  */
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth-200, windowHeight);
 }
