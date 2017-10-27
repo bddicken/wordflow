@@ -1,3 +1,9 @@
+// use for translating on click
+var beforeClickX = 0;
+var beforeClickY = 0;
+var translateX = 0;
+var translateY = 0;
+
 // The depth of the word flow graph
 var depthLimit = 4;
 
@@ -90,25 +96,32 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   var tw = textWidth(node.phrase);
   
   // draw connector
+  fill(0, 0, 0, 0);
   if (depth != 1) {
     strokeWeight(3);
-    stroke(50, 50, 50, 150);
+    stroke(150, 150, 150, 150);
+    // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
-        line(w, h, prev_x+60, prev_y);
+        bezier(w, h, w-40, h, prev_x+70+40, prev_y, prev_x+70, prev_y);
     } else {
-        line(w+60, h, prev_x, prev_y);
-
+        bezier(w+70, h, w+70+40, h, prev_x-40, prev_y, prev_x, prev_y);
     }
   }
+  fill(0, 0, 0, 255);
   
   // draw the node
   stroke(0);
-  strokeWeight(1);
-  fill(200, 230, 255, 255);
-  rect(w, h-10, 60, 20);
+  //strokeWeight(1);
+  noStroke();
+  fill(150, 200, 255, 255);
+  rect(w, h-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
   text(node.phrase, w+(tw/2.0)+2, h+4);
+  fill(100, 255, 100, 200);
+  ellipse(w+60, h, 15, 15);
+  fill(0);
+  text(node.count, w+60, h+4);
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
   noStroke();
@@ -122,8 +135,8 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
 
   var nc = node.children.length;
 
-  if (node!= undefined && node.children != undefined && node.children.length > 0) {
-    for (var i = 0; i < node.children.length; i++) {
+  if (node!= undefined && node.children != undefined && nc > 0) {
+    for (var i = 0; i < nc; i++) {
       var size = ((bot_limit - top_limit) / nc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
@@ -153,6 +166,7 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   if (nn == undefined) {
     nn = new GN(undefined, nw, 1);
     graph.addChild(nn);
+    graph.count = graph.count + 1;
   }
 
   // recurse
@@ -219,13 +233,14 @@ function buildData() {
  * The primary animation loop
  */
 function draw() { 
-  background(220, 220, 220);
+  translate(translateX, translateY);
+  background(50, 50, 50);
   if (firstDraw) {
     firstDraw = false;
     buildData();
   }
-  draw_tree_right(1, 0, height, width/2, f_root, 20, height/2, 110);
-  draw_tree_right(1, 0, height, width/2, b_root, 20, height/2, -110);
+  draw_tree_right(1, 0, height, width/2, f_root, 20, height/2, 120);
+  draw_tree_right(1, 0, height, width/2, b_root, 20, height/2, -120);
 } 
 
 function updateWordSearch() {
@@ -240,3 +255,18 @@ function updateWordSearch() {
 function windowResized() {
   resizeCanvas(windowWidth-200, windowHeight);
 }
+
+function mousePressed() {
+  beforeClickX = mouseX;
+  beforeClickY = mouseY;
+  print('mouse is pressed');
+}
+
+function mouseDragged() {
+  translateX += mouseX - beforeClickX;
+  translateY += mouseY - beforeClickY;
+  beforeClickX = mouseX;
+  beforeClickY = mouseY;
+  print('mouse is dragged');
+}
+
