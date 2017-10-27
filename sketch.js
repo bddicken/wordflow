@@ -1,8 +1,9 @@
-// use for translating on click
+// use for translating ond scaling with the mouse
 var beforeClickX = 0;
 var beforeClickY = 0;
 var translateX = 0;
 var translateY = 0;
+var scaleFactor = 1000;
 
 // The depth of the word flow graph
 var depthLimit = 4;
@@ -161,12 +162,12 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   for (var i = 0; i < graph.children.length; i++) {
     if (graph.children[i].phrase == nw) {
       nn = graph.children[i];
+      nn.count = nn.count + 1;
     }
   }
   if (nn == undefined) {
     nn = new GN(undefined, nw, 1);
     graph.addChild(nn);
-    graph.count = graph.count + 1;
   }
 
   // recurse
@@ -232,7 +233,9 @@ function buildData() {
 /**
  * The primary animation loop
  */
-function draw() { 
+function draw() {
+  if (scaleFactor == 0) { scale (1); }
+  else { scale(scaleFactor/1000); }
   translate(translateX, translateY);
   background(50, 50, 50);
   if (firstDraw) {
@@ -256,17 +259,34 @@ function windowResized() {
   resizeCanvas(windowWidth-200, windowHeight);
 }
 
+/**
+ * Event is triggered whenever the mouse pointer is pressed.
+ * Use to help with translating the canvas so that the graph can be moved around..
+ */
 function mousePressed() {
   beforeClickX = mouseX;
   beforeClickY = mouseY;
   print('mouse is pressed');
 }
 
+/**
+ * Event is triggered whenever the mouse pointer is click-dragged.
+ * Use for translating the canvas so that the graph can be moved around..
+ */
 function mouseDragged() {
   translateX += mouseX - beforeClickX;
   translateY += mouseY - beforeClickY;
   beforeClickX = mouseX;
   beforeClickY = mouseY;
   print('mouse is dragged');
+}
+
+/**
+ * Event is triggered whenever the mouse wheel is scrolled.
+ * This is used for scaling the graph ("zoom" in/out).
+ * event.delta is the positive/negative distance of the scale.
+ */
+function mouseWheel(event) {
+  scaleFactor += event.delta; 
 }
 
