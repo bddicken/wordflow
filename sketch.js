@@ -95,6 +95,9 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
 
   var h = get_node_h(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
+  var sf = scaleFactor/1000;
+  var wsf = w*sf;
+  var hsf = h*sf;
   
   // draw connector
   fill(0, 0, 0, 0);
@@ -103,9 +106,9 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
     stroke(150, 150, 150, 150);
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
-        bezier(w, h, w-40, h, prev_x+70+40, prev_y, prev_x+70, prev_y);
+        bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
     } else {
-        bezier(w+70, h, w+70+40, h, prev_x-40, prev_y, prev_x, prev_y);
+        bezier(wsf+70, hsf, wsf+70+40, hsf, prev_x-40, prev_y, prev_x, prev_y);
     }
   }
   fill(0, 0, 0, 255);
@@ -115,14 +118,16 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   //strokeWeight(1);
   noStroke();
   fill(150, 200, 255, 255);
-  rect(w, h-10, 70, 20, 5);
+  rect(wsf, hsf-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
-  text(node.phrase, w+(tw/2.0)+2, h+4);
-  fill(100, 255, 100, 200);
-  ellipse(w+60, h, 15, 15);
-  fill(0);
-  text(node.count, w+60, h+4);
+  text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
+  if (node.count > 1) {
+    fill(100, 255, 100, 200);
+    ellipse(wsf+60, hsf, 15, 15);
+    fill(0);
+    text(node.count, wsf+60, hsf+4);
+  }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
   noStroke();
@@ -141,7 +146,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
       var size = ((bot_limit - top_limit) / nc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      draw_tree_right(depth+1, ntl, nbl, w + change, node.children[i], w, h, change);
+      draw_tree_right(depth+1, ntl, nbl, w + change, node.children[i], wsf, hsf, change);
     }
   }
 }
@@ -162,12 +167,14 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   for (var i = 0; i < graph.children.length; i++) {
     if (graph.children[i].phrase == nw) {
       nn = graph.children[i];
-      nn.count = nn.count + 1;
+      //nn.count = nn.count + 1;
+      graph.count = graph.count + 1;
     }
   }
   if (nn == undefined) {
-    nn = new GN(undefined, nw, 1);
+    nn = new GN(undefined, nw, 0);
     graph.addChild(nn);
+    graph.count = graph.count + 1;
   }
 
   // recurse
@@ -235,7 +242,11 @@ function buildData() {
  */
 function draw() {
   if (scaleFactor == 0) { scale (1); }
-  else { scale(scaleFactor/1000); }
+  else {
+    translate(width, height);
+    scale(scaleFactor/1000); 
+    translate(-width, -height);
+  }
   translate(translateX, translateY);
   background(50, 50, 50);
   if (firstDraw) {
@@ -287,6 +298,6 @@ function mouseDragged() {
  * event.delta is the positive/negative distance of the scale.
  */
 function mouseWheel(event) {
-  scaleFactor += event.delta; 
+  scaleFactor += event.delta;
 }
 
