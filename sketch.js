@@ -201,31 +201,37 @@ function build_graph_for_word(word, data, increment) {
  * Basic setup
  */
 function setup() {
-  var cnv = createCanvas(windowWidth-200, windowHeight);
+  var cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(200, 0);
   stroke(55);
   frameRate(30);
   
   // Input word button
   textSize(12);
-  input = createInput();
+  input = createInput(graphWord);
   input.position(10, 100);
+  input.parent('sidebar');
   button = createButton('update');
   button.position(input.x + input.width, 100);
   button.mousePressed(updateWordSearch);
+  button.parent('sidebar');
   greeting = createElement('h3', 'Graph Word');
   greeting.position(10, 55);
-  textAlign(CENTER);
+  greeting.parent('sidebar');
   
   // Depth limit button
   textSize(12);
-  inputDepth = createInput();
+  inputDepth = createInput(depthLimit);
   inputDepth.position(10, 150);
+  inputDepth.parent('sidebar');
   buttonDepth = createButton('update');
   buttonDepth.position(input.x + input.width, 150);
   buttonDepth.mousePressed(updateWordSearch);
+  buttonDepth.parent('sidebar');
   greetingDepth = createElement('h3', 'Max Depth');
   greetingDepth.position(10, 105);
+  greetingDepth.parent('sidebar');
+  
   textAlign(CENTER);
 }
 
@@ -263,7 +269,7 @@ function updateWordSearch() {
  * Whenever the browser window is resized, the canvas is resized to fit
  */
 function windowResized() {
-  resizeCanvas(windowWidth-200, windowHeight);
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 /**
