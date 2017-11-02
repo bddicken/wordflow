@@ -121,7 +121,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   fill(0, 0, 0, 255);
   noStroke();
   //stroke(255);
-  fill(220);
+  fill(255, 255, 240);
   text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
   if (node.count > 1) {
     fill(248, 144, 37);
@@ -202,7 +202,8 @@ function build_graph_for_word(word, data, increment) {
  */
 function setup() {
   var cnv = createCanvas(windowWidth, windowHeight);
-  cnv.position(200, 0);
+  cnv.position(0, 0);
+  cnv.parent('canvasholder');
   stroke(55);
   frameRate(30);
   
@@ -255,8 +256,8 @@ function draw() {
     firstDraw = false;
     buildData();
   }
-  draw_tree_right(1, 0, height+7, width/2-30, f_root, 20, height/2, 120);
-  draw_tree_right(1, 0, height+7, width/2-30, b_root, 20, height/2, -120);
+  draw_tree_right(1, 0, height+7, width/2-30+100, f_root, 20, height/2, 120);
+  draw_tree_right(1, 0, height+7, width/2-30+100, b_root, 20, height/2, -120);
 } 
 
 function updateWordSearch() {
