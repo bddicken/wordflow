@@ -101,7 +101,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   fill(0, 0, 0, 0);
   if (depth != 1) {
     strokeWeight(3);
-    stroke(150, 150, 150, 150);
+    stroke(130, 130, 130, 150);
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
         bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
@@ -116,12 +116,15 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   //strokeWeight(1);
   noStroke();
   fill(150, 200, 255, 255);
+  fill(5, 100, 170);
   rect(wsf, hsf-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
+  //stroke(255);
+  fill(220);
   text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
   if (node.count > 1) {
-    fill(100, 255, 100, 200);
+    fill(248, 144, 37);
     ellipse(wsf+60, hsf, 15, 15);
     fill(0);
     text(node.count, wsf+60, hsf+4);
@@ -206,12 +209,12 @@ function setup() {
   // Input word button
   textSize(12);
   input = createInput();
-  input.position(10, 50);
+  input.position(10, 100);
   button = createButton('update');
-  button.position(input.x + input.width, 50);
+  button.position(input.x + input.width, 100);
   button.mousePressed(updateWordSearch);
-  greeting = createElement('h3', 'Graph Word:');
-  greeting.position(10, 5);
+  greeting = createElement('h3', 'Graph Word');
+  greeting.position(10, 55);
   textAlign(CENTER);
   
   // Depth limit button
@@ -241,7 +244,7 @@ function buildData() {
 function draw() {
   translate(translateX, translateY);
   scale(scaleFactor); 
-  background(50, 50, 50);
+  background(255);
   if (firstDraw) {
     firstDraw = false;
     buildData();
@@ -295,5 +298,6 @@ function mouseWheel(event) {
   translateY *= delta;
   translateX += mouseX;
   translateY += mouseY;
+  return false;
 }
 
