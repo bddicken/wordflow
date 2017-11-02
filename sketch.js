@@ -14,7 +14,7 @@ var firstDraw = true;
 
 // The word to generate graph for
 // Eventually, this should be replaced with a user-input value
-var graphWord = 'Lord';
+var graphWord = 'James';
 
 // Word input
 var input, button, greeting;
@@ -60,7 +60,7 @@ class GN {
  * Reads in text data to be processed and analyzed
  */
 function preload() {
-  result = loadStrings('data.txt');
+  result = loadStrings('./data/asv.txt');
 }
 
 /**
