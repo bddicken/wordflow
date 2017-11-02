@@ -1,9 +1,7 @@
 // use for translating ond scaling with the mouse
-var beforeClickX = 0;
-var beforeClickY = 0;
 var translateX = 0;
 var translateY = 0;
-var scaleFactor = 1000;
+var scaleFactor = 1.0;
 
 // The depth of the word flow graph
 var depthLimit = 4;
@@ -95,7 +93,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
 
   var h = get_node_h(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
-  var sf = scaleFactor/1000;
+  var sf = scaleFactor;
   var wsf = w*sf;
   var hsf = h*sf;
   
@@ -241,20 +239,15 @@ function buildData() {
  * The primary animation loop
  */
 function draw() {
-  if (scaleFactor == 0) { scale (1); }
-  else {
-    translate(width, height);
-    scale(scaleFactor/1000); 
-    translate(-width, -height);
-  }
   translate(translateX, translateY);
+  scale(scaleFactor); 
   background(50, 50, 50);
   if (firstDraw) {
     firstDraw = false;
     buildData();
   }
-  draw_tree_right(1, 0, height, width/2, f_root, 20, height/2, 120);
-  draw_tree_right(1, 0, height, width/2, b_root, 20, height/2, -120);
+  draw_tree_right(1, 0, height+7, width/2-30, f_root, 20, height/2, 120);
+  draw_tree_right(1, 0, height+7, width/2-30, b_root, 20, height/2, -120);
 } 
 
 function updateWordSearch() {
@@ -275,8 +268,6 @@ function windowResized() {
  * Use to help with translating the canvas so that the graph can be moved around..
  */
 function mousePressed() {
-  beforeClickX = mouseX;
-  beforeClickY = mouseY;
   print('mouse is pressed');
 }
 
@@ -285,10 +276,8 @@ function mousePressed() {
  * Use for translating the canvas so that the graph can be moved around..
  */
 function mouseDragged() {
-  translateX += mouseX - beforeClickX;
-  translateY += mouseY - beforeClickY;
-  beforeClickX = mouseX;
-  beforeClickY = mouseY;
+  translateX += mouseX - pmouseX;
+  translateY += mouseY - pmouseY;
   print('mouse is dragged');
 }
 
@@ -298,6 +287,13 @@ function mouseDragged() {
  * event.delta is the positive/negative distance of the scale.
  */
 function mouseWheel(event) {
-  scaleFactor += event.delta;
+  translateX -= mouseX;
+  translateY -= mouseY;
+  var delta = event.delta > 0 ? 1.02 : event.delta < 0 ? 1.0/1.02 : 1.0;
+  scaleFactor *= delta;
+  translateX *= delta;
+  translateY *= delta;
+  translateX += mouseX;
+  translateY += mouseY;
 }
 
