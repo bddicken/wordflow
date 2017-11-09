@@ -7,19 +7,23 @@ var scaleFactor = 1.0;
 var depthLimit = 4;
 
 // Where the taxt data is read in and stored
-var result;
+//var result;
+var bible;
+var chapter = '1 Chronicles'
 
 // Set to false after draw is entered for the first time
 var firstDraw = true;
 
 // The word to generate graph for
 // Eventually, this should be replaced with a user-input value
-var graphWord = 'James';
+var graphWord = 'kingdom';
 
 // Word input
 var input, button, greeting;
 // Depth limit input
 var inputDepth, buttonDepth, greetingDepth;
+// Chapter select
+var selectCh, greetingCh;
 
 /**
  * GN is the "Graph-Node" class
@@ -60,18 +64,20 @@ class GN {
  * Reads in text data to be processed and analyzed
  */
 function preload() {
-  result = loadStrings('./data/asv.txt');
+  //result = loadStrings('./data/asv.txt');
+  bible = loadJSON('./data/bible.json');
 }
 
 /**
  * Used to process the text file read in
  * TODO: More advanced processing
  */
-function process_data(data) {
+function process_data(data, chapter) {
   var newData = [];
-  var l = data.length;
+  var chapVersText = data[chapter];
+  var l = chapVersText.length;
   for (var i = 0; i < l; i++) {
-    var splitted = data[i].split(" ");
+    var splitted = chapVersText[i][1].split(" ");
     for (var j = 0; j < splitted.length; j++) {
       newData.push(splitted[j]);
     }
@@ -232,12 +238,22 @@ function setup() {
   greetingDepth = createElement('h3', 'Max Depth');
   greetingDepth.position(10, 105);
   greetingDepth.parent('sidebar');
-  
+
+  background(200);
+  selectCh = createSelect();
+  selectCh.position(10, 200);
+  for (var key in bible) {
+    selectCh.option(key);
+  }
+  selectCh.changed(updateWordSearch);
+  greetingCh = createElement('h3', 'Chapter');
+  greetingCh.position(10, 155);
+  greetingCh.parent('sidebar');
   textAlign(CENTER);
 }
 
 function buildData() {
-  var nd = process_data(result);
+  var nd = process_data(bible, chapter);
   f_root = build_graph_for_word(graphWord, nd, 1);
   b_root = build_graph_for_word(graphWord, nd, -1);
   //f_root.print(1, f_root);
@@ -261,6 +277,7 @@ function draw() {
 } 
 
 function updateWordSearch() {
+  chapter = selectCh.value();
   graphWord = input.value();
   depthLimit = int(inputDepth.value());
   buildData();
