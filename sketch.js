@@ -136,10 +136,11 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   fill(255, 255, 240);
   text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
   if (node.count > 1) {
+    var nodeTextWidth = textWidth('' + node.count);
     fill(248, 144, 37);
-    ellipse(wsf+60, hsf, 15, 15);
+    ellipse(wsf + 68 - (nodeTextWidth/2), hsf, nodeTextWidth + 5, 15);
     fill(0);
-    text(node.count, wsf+60, hsf+4);
+    text(node.count, wsf + 68 - (nodeTextWidth/2), hsf+4);
   }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
