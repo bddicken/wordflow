@@ -9,19 +9,24 @@ var depthLimit = 4;
 // Where the taxt data is read in and stored
 //var result;
 var bible;
-var chapter = '1 Chronicles'
+var chapter = 'John'
 
 // Set to false after draw is entered for the first time
 var firstDraw = true;
 
 // The word to generate graph for
 // Eventually, this should be replaced with a user-input value
-var graphWord = 'kingdom';
+var graphWord = 'Jesus';
+
+// The default value for path frequency occurence threshold
+var pathFreq = 4;
 
 // Word input
 var input, button, greeting;
 // Depth limit input
 var inputDepth, buttonDepth, greetingDepth;
+// Path frequency limit input
+var inputFreq, buttonFreq, greetingFreq;
 // Chapter select
 var selectCh, greetingCh;
 
@@ -96,6 +101,7 @@ function get_node_h(tl, bl) {
 function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
 
   if (node == undefined) { return; }
+  if (node.count < pathFreq) { return; }
 
   var h = get_node_h(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
@@ -149,8 +155,19 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   var nc = node.children.length;
 
   if (node!= undefined && node.children != undefined && nc > 0) {
+
+    // Figure out how many children need to be traversed, based on the frequency threshold
+    var childrenToTraverse = []
     for (var i = 0; i < nc; i++) {
-      var size = ((bot_limit - top_limit) / nc);
+      if (node.children[i] != undefined && node.children[i].count >= pathFreq) { 
+        childrenToTraverse.push(node.children[i]);
+      }
+    }
+
+    // Traverse the correct children
+    var ntc = childrenToTraverse.length;
+    for (var i = 0; i < ntc; i++) {
+      var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
       draw_tree_right(depth+1, ntl, nbl, w + change, node.children[i], wsf, hsf, change);
@@ -179,9 +196,11 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
     }
   }
   if (nn == undefined) {
-    nn = new GN(undefined, nw, 0);
+    nn = new GN(undefined, nw, 1);
     graph.addChild(nn);
-    graph.count = graph.count + 1;
+    if (graph.children.length > 1) {
+      graph.count = graph.count + 1;
+    }
   }
 
   // recurse
@@ -249,6 +268,20 @@ function setup() {
   greetingCh = createElement('h3', 'Chapter');
   greetingCh.position(10, 155);
   greetingCh.parent('sidebar');
+  
+  // Path frequency limit button
+  textSize(12);
+  inputFreq = createInput(pathFreq);
+  inputFreq.position(10, 250);
+  inputFreq.parent('sidebar');
+  buttonFreq = createButton('update');
+  buttonFreq.position(input.x + input.width, 250);
+  buttonFreq.mousePressed(updateWordSearch);
+  buttonFreq.parent('sidebar');
+  greetingFreq = createElement('h3', 'Max path freqency');
+  greetingFreq.position(10, 205);
+  greetingFreq.parent('sidebar');
+ 
   textAlign(CENTER);
 }
 
@@ -277,6 +310,7 @@ function draw() {
 } 
 
 function updateWordSearch() {
+  pathFreq = int(inputFreq.value());
   chapter = selectCh.value();
   graphWord = input.value();
   depthLimit = int(inputDepth.value());
@@ -303,6 +337,7 @@ function mousePressed() {
  * Use for translating the canvas so that the graph can be moved around..
  */
 function mouseDragged() {
+  if (mouseX < 200) { return; } // Don't move graph when dragging on menu bar
   translateX += mouseX - pmouseX;
   translateY += mouseY - pmouseY;
   print('mouse is dragged');
