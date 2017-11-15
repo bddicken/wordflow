@@ -170,7 +170,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      draw_tree_right(depth+1, ntl, nbl, w + change, node.children[i], wsf, hsf, change);
+      draw_tree_right(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change);
     }
   }
 }
@@ -262,7 +262,12 @@ function setup() {
   selectCh = createSelect();
   selectCh.position(10, 200);
   for (var key in bible) {
-    selectCh.option(key);
+    var el = createElement('option', key);
+  // set the default selected chapter
+    if (key == chapter) {
+      el.attribute('selected', 'selected');
+    }
+    selectCh.child(el);
   }
   selectCh.changed(updateWordSearch);
   greetingCh = createElement('h3', 'Chapter');
