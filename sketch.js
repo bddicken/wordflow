@@ -30,6 +30,11 @@ var inputFreq, buttonFreq, greetingFreq;
 // Chapter select
 var selectCh, greetingCh;
 
+// Custom pmouseX and pmouseY
+// See mouseDragged function for more details
+var pmouseXCustom = -1;
+var pmouseYCustom = -1;
+
 /**
  * GN is the "Graph-Node" class
  * Used for the internal model of the visual word-graph
@@ -99,8 +104,12 @@ function getNodeH(tl, bl) {
  */
 function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
 
-  if (node == undefined) { return; }
-  if (node.count < pathFreq) { return; }
+  if (node == undefined) { return false; }
+  if (node.count < pathFreq) { return false; }
+
+  // mouseX and mouseX adjusted for scale and translation
+  var mXA = (mouseX - translateX) * (1/scaleFactor);
+  var mYA = (mouseY - translateY) * (1/scaleFactor);
 
   var h = getNodeH(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
@@ -108,20 +117,8 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var wsf = w*sf;
   var hsf = h*sf;
   
-  // draw connector
-  fill(0, 0, 0, 0);
-  if (depth != 1) {
-    strokeWeight(3);
-    stroke(130, 130, 130, 150);
-    // draw a bezier curve, but modify depending on forwards or backwards display
-    if (change > 0) {
-        bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
-    } else {
-        bezier(wsf+70, hsf, wsf+70+40, hsf, prev_x-40, prev_y, prev_x, prev_y);
-    }
-  }
   fill(0, 0, 0, 255);
-  
+
   // draw the node
   stroke(0);
   noStroke();
@@ -143,12 +140,16 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
   noStroke();
 
+  var highlightPath = false;
   // handle button press
-  //if (mousePressed) {
-  //  if (mouseX > w && mouseX < w+20 && mouseY > h-10 && mouseY < h+10) {
-  //    graphWord = node.phrase;
-  //  }
-  //} 
+  if (mouseIsPressed) {
+    if (mXA > wsf && mXA < wsf+70 && mYA > hsf-10 && mYA < hsf+10) {
+      //graphWord = node.phrase;
+      fill(0, 255, 255, 75);
+      rect(wsf, hsf-10, 70, 20, 5);
+      highlightPath = true;
+    }
+  } 
 
   var nc = node.children.length;
 
@@ -168,9 +169,31 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change);
+      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change) || highlightPath;
     }
   }
+  
+  // draw connector
+  fill(0, 0, 0, 0);
+  if (depth != 1) {
+    strokeWeight(3);
+
+    // determine wether or not to highlight the path green
+    if (highlightPath) {
+      stroke(130, 255, 130, 200);
+    } else {
+      stroke(130, 130, 130, 150);
+    }
+
+    // draw a bezier curve, but modify depending on forwards or backwards display
+    if (change > 0) {
+        bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
+    } else {
+        bezier(wsf+70, hsf, wsf+70+40, hsf, prev_x-40, prev_y, prev_x, prev_y);
+    }
+  }
+
+  return highlightPath;
 }
   
 var f_root = undefined;
@@ -328,9 +351,21 @@ function windowResized() {
  * Use for translating the canvas so that the graph can be moved around..
  */
 function mouseDragged() {
+  if (pmouseXCustom == -1 && pmouseYCustom == -1) { pmouseXCustom = pmouseX ; pmouseYCustom = pmouseY; }
   if (mouseX < 250) { return; } // Don't move graph when dragging on menu bar
-  translateX += mouseX - pmouseX;
-  translateY += mouseY - pmouseY;
+  // For some reason, using the built-in pmouseX and pmouseY to handle dragging of the canvas
+  // Does not work properly. Dragging ends up occurring too fast.
+  // Had to implement my own pmouseX/pmouseY instead.
+  // Maybe this is purposeful, or maybe it's a bug in p5.js that will be addressed in the future.
+  translateX += mouseX - pmouseXCustom;
+  translateY += mouseY - pmouseYCustom;
+  pmouseXCustom = mouseX;
+  pmouseYCustom = mouseY;
+}
+
+function mouseReleased() {
+  pmouseXCustom = -1;
+  pmouseYCustom = -1;
 }
 
 /**
