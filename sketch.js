@@ -9,7 +9,7 @@ var depthLimit = 4;
 // Where the taxt data is read in and stored
 //var result;
 var bible;
-var chapter = 'John'
+var chapter = 'Matthew'
 
 // Set to false after draw is entered for the first time
 var firstDraw = true;
@@ -19,7 +19,7 @@ var firstDraw = true;
 var graphWord = 'Jesus';
 
 // The default value for path frequency occurence threshold
-var pathFreq = 4;
+var pathFreq = 3;
 
 // Word input
 var input, button, greeting;
