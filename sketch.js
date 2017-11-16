@@ -127,7 +127,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   stroke(0);
   //strokeWeight(1);
   noStroke();
-  fill(150, 200, 255, 255);
+  fill(150, 250, 255, 255);
   fill(5, 100, 170);
   rect(wsf, hsf-10, 70, 20, 5);
   fill(0, 0, 0, 255);
@@ -249,19 +249,19 @@ function setup() {
   // Depth limit button
   textSize(12);
   inputDepth = createInput(depthLimit);
-  inputDepth.position(10, 150);
+  inputDepth.position(10, 174);
   inputDepth.parent('sidebar');
   buttonDepth = createButton('update');
-  buttonDepth.position(input.x + input.width, 150);
+  buttonDepth.position(input.x + input.width, 175);
   buttonDepth.mousePressed(updateWordSearch);
   buttonDepth.parent('sidebar');
   greetingDepth = createElement('h3', 'Max Depth');
-  greetingDepth.position(10, 105);
+  greetingDepth.position(10, 125);
   greetingDepth.parent('sidebar');
 
   background(200);
   selectCh = createSelect();
-  selectCh.position(10, 200);
+  selectCh.position(10, 250);
   for (var key in bible) {
     var el = createElement('option', key);
   // set the default selected chapter
@@ -272,20 +272,20 @@ function setup() {
   }
   selectCh.changed(updateWordSearch);
   greetingCh = createElement('h3', 'Chapter');
-  greetingCh.position(10, 155);
+  greetingCh.position(10, 205);
   greetingCh.parent('sidebar');
   
   // Path frequency limit button
   textSize(12);
   inputFreq = createInput(pathFreq);
-  inputFreq.position(10, 250);
+  inputFreq.position(10, 315);
   inputFreq.parent('sidebar');
   buttonFreq = createButton('update');
-  buttonFreq.position(input.x + input.width, 250);
+  buttonFreq.position(input.x + input.width, 315);
   buttonFreq.mousePressed(updateWordSearch);
   buttonFreq.parent('sidebar');
   greetingFreq = createElement('h3', 'Max path freqency');
-  greetingFreq.position(10, 205);
+  greetingFreq.position(10, 265);
   greetingFreq.parent('sidebar');
  
   textAlign(CENTER);
@@ -343,7 +343,7 @@ function mousePressed() {
  * Use for translating the canvas so that the graph can be moved around..
  */
 function mouseDragged() {
-  if (mouseX < 200) { return; } // Don't move graph when dragging on menu bar
+  if (mouseX < 250) { return; } // Don't move graph when dragging on menu bar
   translateX += mouseX - pmouseX;
   translateY += mouseY - pmouseY;
   print('mouse is dragged');
