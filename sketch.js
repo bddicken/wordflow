@@ -69,7 +69,6 @@ class GN {
  * Reads in text data to be processed and analyzed
  */
 function preload() {
-  //result = loadStrings('./data/asv.txt');
   bible = loadJSON('./data/bible.json');
 }
 
@@ -77,7 +76,7 @@ function preload() {
  * Used to process the text file read in
  * TODO: More advanced processing
  */
-function process_data(data, chapter) {
+function processData(data, chapter) {
   var newData = [];
   var chapVersText = data[chapter];
   var l = chapVersText.length;
@@ -91,19 +90,19 @@ function process_data(data, chapter) {
   return newData;
 }
   
-function get_node_h(tl, bl) {
+function getNodeH(tl, bl) {
   return tl + ((bl - tl)/2.0);
 }
 
 /**
  * Recursive function to draw the tree
  */
-function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
+function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
 
   if (node == undefined) { return; }
   if (node.count < pathFreq) { return; }
 
-  var h = get_node_h(top_limit, bot_limit);
+  var h = getNodeH(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
   var sf = scaleFactor;
   var wsf = w*sf;
@@ -125,14 +124,12 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
   
   // draw the node
   stroke(0);
-  //strokeWeight(1);
   noStroke();
   fill(150, 250, 255, 255);
   fill(5, 100, 170);
   rect(wsf, hsf-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
-  //stroke(255);
   fill(255, 255, 240);
   text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
   if (node.count > 1) {
@@ -171,7 +168,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      draw_tree_right(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change);
+      drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change);
     }
   }
 }
@@ -179,7 +176,7 @@ function draw_tree_right(depth, top_limit, bot_limit, w, node, prev_x, prev_y, c
 var f_root = undefined;
 var b_root = undefined;
 
-function build_graph_for_recursive(word, data, index, depth, graph, increment) {
+function buildGraphForWordRecursive(word, data, index, depth, graph, increment) {
   
   // recursive base-cases
   if (depth >= depthLimit) { return; }
@@ -192,7 +189,6 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   for (var i = 0; i < graph.children.length; i++) {
     if (graph.children[i].phrase == nw) {
       nn = graph.children[i];
-      //nn.count = nn.count + 1;
       graph.count = graph.count + 1;
     }
   }
@@ -205,20 +201,20 @@ function build_graph_for_recursive(word, data, index, depth, graph, increment) {
   }
 
   // recurse
-  build_graph_for_recursive(nn.phrase, data, index+increment, depth + 1, nn, increment);
+  buildGraphForWordRecursive(nn.phrase, data, index+increment, depth + 1, nn, increment);
 }
 
 /**
  * graph is an out-param
  */
-function build_graph_for_word(word, data, increment) {
+function buildGraphForWord(word, data, increment) {
   var matching_indexes = [];
   for (var i = 0 ; i < data.length ; i++) {
     if (data[i] == word) { matching_indexes.push(i); }
   }
   var root = new GN(undefined, word, 3);
   for (var i = 0 ; i < matching_indexes.length ; i++) {
-    build_graph_for_recursive(word, data, matching_indexes[i], 0, root, increment);
+    buildGraphForWordRecursive(word, data, matching_indexes[i], 0, root, increment);
   }
   return root;
 }
@@ -264,7 +260,7 @@ function setup() {
   selectCh.position(10, 250);
   for (var key in bible) {
     var el = createElement('option', key);
-  // set the default selected chapter
+    // set the default selected chapter
     if (key == chapter) {
       el.attribute('selected', 'selected');
     }
@@ -292,12 +288,9 @@ function setup() {
 }
 
 function buildData() {
-  var nd = process_data(bible, chapter);
-  f_root = build_graph_for_word(graphWord, nd, 1);
-  b_root = build_graph_for_word(graphWord, nd, -1);
-  //f_root.print(1, f_root);
-  //print("-----\n");
-  //b_root.print(1, b_root);
+  var nd = processData(bible, chapter);
+  f_root = buildGraphForWord(graphWord, nd, 1);
+  b_root = buildGraphForWord(graphWord, nd, -1);
 }
 
 /**
@@ -311,8 +304,8 @@ function draw() {
     firstDraw = false;
     buildData();
   }
-  draw_tree_right(1, 0, height+7, width/2-30+100, f_root, 20, height/2, 120);
-  draw_tree_right(1, 0, height+7, width/2-30+100, b_root, 20, height/2, -120);
+  drawWordTree(1, 0, height+7, width/2-30+100, f_root, 20, height/2, 120);
+  drawWordTree(1, 0, height+7, width/2-30+100, b_root, 20, height/2, -120);
 } 
 
 function updateWordSearch() {
@@ -331,14 +324,6 @@ function windowResized() {
 }
 
 /**
- * Event is triggered whenever the mouse pointer is pressed.
- * Use to help with translating the canvas so that the graph can be moved around..
- */
-function mousePressed() {
-  print('mouse is pressed');
-}
-
-/**
  * Event is triggered whenever the mouse pointer is click-dragged.
  * Use for translating the canvas so that the graph can be moved around..
  */
@@ -346,7 +331,6 @@ function mouseDragged() {
   if (mouseX < 250) { return; } // Don't move graph when dragging on menu bar
   translateX += mouseX - pmouseX;
   translateY += mouseY - pmouseY;
-  print('mouse is dragged');
 }
 
 /**
