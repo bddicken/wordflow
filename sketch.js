@@ -9,6 +9,7 @@ var depthLimit = 4;
 // Where the taxt data is read in and stored
 //var result;
 var bible;
+var biblePureText = undefined;
 var chapter = 'Matthew'
 
 // Set to false after draw is entered for the first time
@@ -35,6 +36,15 @@ var selectCh, greetingCh;
 var pmouseXCustom = -1;
 var pmouseYCustom = -1;
 
+var clickForwardPath = "";
+var clickBackwardPath = "";
+
+// Infor about the currently-clicked phrase in the graph
+var clickedPhrase = "";
+var clickedPureTextIndexes = [];
+var clickedForward = true;
+var clickedDepth = 0;
+
 /**
  * GN is the "Graph-Node" class
  * Used for the internal model of the visual word-graph
@@ -45,10 +55,53 @@ class GN {
     this.count = count;
     this.parentGN = parentGN;
     this.children = [];
+    this.pureTextIndexes = [];
+    this.originalText = undefined;
+    this.originIndex = undefined;
+  }
+
+  addPureTextIndex(index) {
+    this.pureTextIndexes.push(index);
+  }
+
+  hasOriginalTextInfo() {
+    return this.originalText != undefined && this.originIndex != undefined;
+  }
+
+  /**
+   * Store the original text that graph was extracted from.
+   * Typically only needed for root node, which is why this is a separate function.
+   */
+  addOriginalTextInfo(originalText, originIndex) {
+    this.originalText = originalText;
+    this.originIndex = originIndex;
   }
 
   addChild(child) {
     this.children.push(child);
+  }
+
+  /**
+   * Check if this node has a pth through the children with the stringPath text.
+   */
+  checkIfHasPath(stringPath) {
+    var splitted = stringPath.split(" ");
+    //print("splitteddd = " + splitted);
+    return this.checkIfHasPathRecursiveHelper(splitted, 0, this);
+  }
+
+  checkIfHasPathRecursiveHelper(stringPath, spIndex, node) {
+    if (spIndex == ((stringPath.length))) {
+      //print("TRUE!");
+      return true;
+    }
+    var foundPath = false;
+    if (node.phrase == stringPath[spIndex]) {
+      for (var i = 0 ; i < node.children.length ; i++) {
+        foundPath = foundPath || this.checkIfHasPathRecursiveHelper(stringPath, spIndex+1, node.children[i]);
+      }
+    }
+    return foundPath;
   }
 
   /**
@@ -102,7 +155,7 @@ function getNodeH(tl, bl) {
 /**
  * Recursive function to draw the tree
  */
-function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change) {
+function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change, oppositeRoot) {
 
   if (node == undefined) { return false; }
   if (node.count < pathFreq) { return false; }
@@ -144,6 +197,10 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   // handle button press
   if (mouseIsPressed) {
     if (mXA > wsf && mXA < wsf+70 && mYA > hsf-10 && mYA < hsf+10) {
+      clickedPhrase = node.phrase;
+      clickedPureTextIndexes = node.pureTextIndexes;
+      clickedForward = (change > 0) ? true : false;
+      clickedDepth = (change > 0) ? depth : -depth;
       //graphWord = node.phrase;
       fill(0, 255, 255, 75);
       rect(wsf, hsf-10, 70, 20, 5);
@@ -169,21 +226,32 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change) || highlightPath;
+      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change, oppositeRoot) || highlightPath;
     }
   }
   
   // draw connector
   fill(0, 0, 0, 0);
-  if (depth != 1) {
+  if (depth != 0) {
     strokeWeight(3);
 
-    // determine wether or not to highlight the path green
-    if (highlightPath) {
+    // check path highlight NEW
+    var hl = nodeIntersectsClicked(node, depth);
+    if (hl || highlightPath) {
       stroke(130, 255, 130, 200);
     } else {
       stroke(130, 130, 130, 150);
     }
+
+/*
+    // determine wether or not to highlight the path green
+    //if (highlightPath || oppositeRoot.checkIfHasPath(clickForwardPath)) {
+    if (highlightpath) {
+      stroke(130, 255, 130, 200);
+    } else {
+      stroke(130, 130, 130, 150);
+    }
+    */
 
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
@@ -192,8 +260,32 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
         bezier(wsf+70, hsf, wsf+70+40, hsf, prev_x-40, prev_y, prev_x, prev_y);
     }
   }
+    
+  if (highlightPath) {
+    if (clickForwardPath == "") {
+      clickForwardPath = node.phrase;
+    } else {
+      clickForwardPath = node.phrase + " " + clickForwardPath;
+    }
+  } 
 
   return highlightPath;
+}
+
+function nodeIntersectsClicked(node, depth) {
+  // check path highlight NEW
+  for (var i = 0 ; i < clickedPureTextIndexes.length; i++) {
+    var wi = clickedPureTextIndexes[i] + ((-clickedDepth) + depth);
+    //print(clickedPureTextIndexes.length + "===");
+    for (var j = 0 ; j < node.pureTextIndexes.length; j++) {
+      //print(node.pureTextIndexes[j] + "'''" + wi);
+      if (node.pureTextIndexes[j] == wi) {
+
+        return true;
+      }
+    }
+  }
+  return false;
 }
   
 var f_root = undefined;
@@ -222,6 +314,7 @@ function buildGraphForWordRecursive(word, data, index, depth, graph, increment) 
       graph.count = graph.count + 1;
     }
   }
+  nn.addPureTextIndex(index+increment);
 
   // recurse
   buildGraphForWordRecursive(nn.phrase, data, index+increment, depth + 1, nn, increment);
@@ -238,6 +331,7 @@ function buildGraphForWord(word, data, increment) {
   var root = new GN(undefined, word, 3);
   for (var i = 0 ; i < matching_indexes.length ; i++) {
     buildGraphForWordRecursive(word, data, matching_indexes[i], 0, root, increment);
+    root.addPureTextIndex(matching_indexes[i]);
   }
   return root;
 }
@@ -311,9 +405,9 @@ function setup() {
 }
 
 function buildData() {
-  var nd = processData(bible, chapter);
-  f_root = buildGraphForWord(graphWord, nd, 1);
-  b_root = buildGraphForWord(graphWord, nd, -1);
+  biblePureText = processData(bible, chapter);
+  f_root = buildGraphForWord(graphWord, biblePureText, 1);
+  b_root = buildGraphForWord(graphWord, biblePureText, -1);
 }
 
 /**
@@ -327,8 +421,11 @@ function draw() {
     firstDraw = false;
     buildData();
   }
-  drawWordTree(1, 0, height+7, width/2-30+100, f_root, 20, height/2, 120);
-  drawWordTree(1, 0, height+7, width/2-30+100, b_root, 20, height/2, -120);
+  drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 120, b_root);
+  //print("FPA: >" + clickForwardPath + "<")
+  drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
+  //print("FPB: >" + clickForwardPath + "<")
+  clickForwardPath = "";
 } 
 
 function updateWordSearch() {
