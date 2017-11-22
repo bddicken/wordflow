@@ -1,4 +1,6 @@
-// use for translating ond scaling with the mouse
+
+
+// use for translating and scaling with the mouse
 var translateX = 0;
 var translateY = 0;
 var scaleFactor = 1.0;
@@ -30,6 +32,8 @@ var inputDepth, buttonDepth, greetingDepth;
 var inputFreq, buttonFreq, greetingFreq;
 // Chapter select
 var selectCh, greetingCh;
+// Verses listing label
+var greetingVerses;
 
 // The verses associated with the currently-selected graph node
 var versesForSelected = [];
@@ -200,6 +204,20 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       rect(wsf, hsf-10, 70, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
+      var infobar = document.getElementById('infobar');
+      infobar.innerHTML = '';
+      for (var i = 0; i < node.verses.length; i++) {
+        var ci = infobar.innerHTML;
+        var blbBase = 'https://www.blueletterbible.org/asv/';
+        var bcv = node.verses[i];
+        var sp = bcv.split('_')
+        var book = sp[0]
+        var chap = sp[1].split(':')[0]
+        var vers = sp[1].split(':')[1]
+        var url = blbBase + book + '/' + chap + '/' + vers;
+        var link = '<a target="_blank" href = "' + url + '">' + bcv + '</a>';
+        infobar.innerHTML = ci + link + '<br/>';
+      }
     }
   } 
 
@@ -371,6 +389,10 @@ function setup() {
   greetingFreq = createElement('h3', 'Max path freqency');
   greetingFreq.position(10, 265);
   greetingFreq.parent('sidebar');
+  
+  greetingVerses = createElement('h3', 'Verses');
+  greetingVerses.position(10, 350);
+  greetingVerses.parent('sidebar');
  
   textAlign(CENTER);
 }
@@ -439,6 +461,7 @@ function mouseReleased() {
  * event.delta is the positive/negative distance of the scale.
  */
 function mouseWheel(event) {
+  if (mouseX < 250) { return; } // Don't zoom graph when dragging on menu bar
   translateX -= mouseX;
   translateY -= mouseY;
   var delta = event.delta > 0 ? 1.02 : event.delta < 0 ? 1.0/1.02 : 1.0;
