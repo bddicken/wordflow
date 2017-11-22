@@ -27,7 +27,7 @@ for line in f:
     else:
         if not book in bible:
             bible[book] = []
-        verse_text = [chap_vers, line_split[1]]
+        verse_text = [book + ' ' + chap_vers, line_split[1]]
         bible[book].append(verse_text)
 
 

@@ -31,6 +31,9 @@ var inputFreq, buttonFreq, greetingFreq;
 // Chapter select
 var selectCh, greetingCh;
 
+// NEW selection info
+var versesForSelected = [];
+
 // Custom pmouseX and pmouseY
 // See mouseDragged function for more details
 var pmouseXCustom = -1;
@@ -58,6 +61,11 @@ class GN {
     this.pureTextIndexes = [];
     this.originalText = undefined;
     this.originIndex = undefined;
+    this.verses = [];
+  }
+
+  addVerse(verse) {
+    this.verses.push(verse);
   }
 
   addPureTextIndex(index) {
@@ -141,7 +149,7 @@ function processData(data, chapter) {
   for (var i = 0; i < l; i++) {
     var splitted = chapVersText[i][1].split(" ");
     for (var j = 0; j < splitted.length; j++) {
-      newData.push(splitted[j]);
+      newData.push([chapVersText[i][0], splitted[j]]);
     }
   }
   print(newData);
@@ -299,7 +307,8 @@ function buildGraphForWordRecursive(word, data, index, depth, graph, increment) 
   if (0 > index+increment) { return; }
 
   // find existing or create new node and add to graph
-  var nw = data[index+increment];
+  var verse = data[index+increment][0];
+  var nw = data[index+increment][1];
   var nn = undefined;
   for (var i = 0; i < graph.children.length; i++) {
     if (graph.children[i].phrase == nw) {
@@ -314,6 +323,7 @@ function buildGraphForWordRecursive(word, data, index, depth, graph, increment) 
       graph.count = graph.count + 1;
     }
   }
+  nn.addVerse(verse);
   nn.addPureTextIndex(index+increment);
 
   // recurse
@@ -326,12 +336,14 @@ function buildGraphForWordRecursive(word, data, index, depth, graph, increment) 
 function buildGraphForWord(word, data, increment) {
   var matching_indexes = [];
   for (var i = 0 ; i < data.length ; i++) {
-    if (data[i] == word) { matching_indexes.push(i); }
+    if (data[i][1] == word) { matching_indexes.push(i); }
   }
   var root = new GN(undefined, word, 3);
   for (var i = 0 ; i < matching_indexes.length ; i++) {
     buildGraphForWordRecursive(word, data, matching_indexes[i], 0, root, increment);
     root.addPureTextIndex(matching_indexes[i]);
+    var verse = data[matching_indexes[i]][0];
+    root.addVerse(verse);
   }
   return root;
 }
