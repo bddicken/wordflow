@@ -5,17 +5,102 @@
     <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet">
     <style> 
       body {
-        padding: 0;
-        margin: 0;
+        padding: 50;
+        margin: 50;
         font-family: 'Poppins', sans-serif;
         font-family: "Questrial", "Arial", sans-serif;
+      }
+      #logo {
+        width:180px;
+        display:block;
+        margin:auto;
+        margin-top:5px;
       }
     </style>
   </head>
   <body>
-  flow graphic by <a href="https://thenounproject.com/logotypemaker.com">tnp_logotypemaker_com</a>
-  from <a href="https://thenounproject.com/">TheNounProject</a>
-  is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
-  Logo Design<a href="http://logomakr.com" title="Logo Maker">LogoMaker.com</a>
+  <img id="logo" src="./img/wordflow-2.png"/>
+
+  <h3>Welcome to wordflow!</h3>
+
+  <p>
+  Wordflow is an application designed for studying the "flow" of words throughout the Bible.
+  More specifically, it helps the user identify which words (or sequences of words) lead up to and come after any word of interest.
+  </p>
+  
+  <p>
+  The main feature of wordflow is the "word graph".
+  The word graph is displayed as a bi-directional tree, with the word you search for as the center-point.
+  Below is an example word graph.
+  </p>
+
+  <img src="./img/word-graph.png" width="500"/>
+
+  <p>
+  The pathways to the left of "Jesus" are words (or sequences of words) that lead up-to the word "Jesus" within the search constraints (more on these in a bit).
+  Similarly, the ones to the right are the words (or sequences) that follow the word "Jesus" within the search constraints.
+  Each word (or "node") in the graph also has a orange-highlighted number.
+  The number represents the number of times that word appears in that position, relative to the central word.
+  In the example above, the word "when" appears before "Jesus" 13 times.
+  However, the sequence of words "Now when" appears before "Jesus" 5 times.
+  The same goes word the words to the right.
+  The word "answered" appears after Jesus 11 times, but the whole phrase "answered and said"  appears only 7 times.
+  All of the words, numbers, and information displayed on the word graph are representative of the Bible within the search parameters.
+  </p>
+  
+  <p>
+  All of the words, numbers, and information displayed on the word graph are representative of the Bible within the search constraints.
+  The search parameters are user-editable, and appear on the left-hand side of the window.
+  Below is an example set of search parameters.
+  </p>
+  
+  <img src="./img/search.png" width="150" style="float:left; margin-right:20px;"/>
+
+  <p>
+  The <b>Graph Word</b> is the word which will be the center of the word graph.
+  The <b>Max Depth</b> the maximum length that the left/right paths will extend out.
+  This can be used to limit the size of the graph, and make it more manageable for the user to view.
+  Currently, wordflow can only search on chapter at-a-time.
+  You can use the <b>Chapter</b> dropdown to select the desired chapter to search.
+  <b>Max Path Frequency</b> controls how often a particular sequence of words must occur in order for it to be shown in the graph.
+  When it is set to 1, all pathways will appear.
+  You can set it higher to prune the graph.
+  Again, this can be useful to limit the size of the graph, when there are many search results.
+  </p>
+
+  <p>
+  When you click on a word in the word graph, a few things happen.
+  All of the verses that correspond to this word in the graph appear in the <b>Verses</b> text box.
+  You can click on any of these verses, and it will link to the same verse on blueletterbible.com.
+  </p>
+ 
+
+  <p>
+  When you click on a word, you'll also notice that the color of some of the pathways becomes highlighted green.
+  The highlighted pathway represents all of the paths in the graph that correspond with that particular word.
+  Take a look at the below example:
+  <br/>
+  <img src="./img/highlight.png" width="250" style="margin:10px;"/>
+  <br/>
+  In this example, I clicked on the word "And".
+  Many paths on the right side of the graph also became highlighted green.
+  This means that each of the green paths are one of the ones that come after "And Jesus" in the text.
+  </p>
+
+  <br style="clear: both;"/>
+
+  <h3> Contact </h3>
+  If you encounter any problems while using wordflow, or have suggestions for enhancements or new features, please let me know!
+  The best way to report bugs or make requests is on the <a href="https://github.com/bddicken/wordflow/issues">github issues page</a>.
+  
+  <br style="clear: both;"/>
+
+  <h3> Credits </h3>
+
+  <ul>
+  <li> The flow graphic by <a href="https://thenounproject.com/logotypemaker.com">tnp_logotypemaker_com</a> from <a href="https://thenounproject.com/">TheNounProject</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a> </li>
+  <li> Logo Design Tool: <a href="http://logomakr.com" title="Logo Maker">LogoMaker.com</a> </li>
+  </ul>
+
   </body>
 </html>
