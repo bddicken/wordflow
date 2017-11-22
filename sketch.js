@@ -39,14 +39,16 @@ var versesForSelected = [];
 var pmouseXCustom = -1;
 var pmouseYCustom = -1;
 
-var clickForwardPath = "";
-var clickBackwardPath = "";
+//var clickForwardPath = "";
+//var clickBackwardPath = "";
 
+/*
 // Infor about the currently-clicked phrase in the graph
 var clickedPhrase = "";
 var clickedPureTextIndexes = [];
 var clickedForward = true;
 var clickedDepth = 0;
+*/
 
 /**
  * GN is the "Graph-Node" class
@@ -205,14 +207,17 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   // handle button press
   if (mouseIsPressed) {
     if (mXA > wsf && mXA < wsf+70 && mYA > hsf-10 && mYA < hsf+10) {
+      /*
       clickedPhrase = node.phrase;
       clickedPureTextIndexes = node.pureTextIndexes;
       clickedForward = (change > 0) ? true : false;
       clickedDepth = (change > 0) ? depth : -depth;
       //graphWord = node.phrase;
+      */
       fill(0, 255, 255, 75);
       rect(wsf, hsf-10, 70, 20, 5);
       highlightPath = true;
+      versesForSelected = node.verses;
     }
   } 
 
@@ -244,7 +249,13 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
     strokeWeight(3);
 
     // check path highlight NEW
-    var hl = nodeIntersectsClicked(node, depth);
+    //var hl = nodeIntersectsClicked(node, depth);
+    var hl = false;
+    for (var i = 0; i < node.verses.length; i++) {
+      if (versesForSelected.indexOf(node.verses[i]) > -1) {
+        hl = true;
+      }
+    }
     if (hl || highlightPath) {
       stroke(130, 255, 130, 200);
     } else {
@@ -269,17 +280,20 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
     }
   }
     
+  /*
   if (highlightPath) {
     if (clickForwardPath == "") {
       clickForwardPath = node.phrase;
     } else {
       clickForwardPath = node.phrase + " " + clickForwardPath;
     }
-  } 
+  }
+  */ 
 
   return highlightPath;
 }
 
+/*
 function nodeIntersectsClicked(node, depth) {
   // check path highlight NEW
   for (var i = 0 ; i < clickedPureTextIndexes.length; i++) {
@@ -295,6 +309,7 @@ function nodeIntersectsClicked(node, depth) {
   }
   return false;
 }
+*/
   
 var f_root = undefined;
 var b_root = undefined;
@@ -437,7 +452,7 @@ function draw() {
   //print("FPA: >" + clickForwardPath + "<")
   drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
   //print("FPB: >" + clickForwardPath + "<")
-  clickForwardPath = "";
+  //clickForwardPath = "";
 } 
 
 function updateWordSearch() {
