@@ -35,13 +35,58 @@
         box-sizing: border-box;
         font-size:14px;
       }
+      #infobar {
+        position: absolute;
+        left: 10px;
+        top: 400px;
+        width:210px;
+        height: calc(100% - 410px);
+        background-color: rgba(50, 175, 200, 0.2);
+        border-radius: 10px;
+        overflow-y: scroll;
+        padding:10px;
+      }
+      #sidebar {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width:250px;
+        height:100vh;
+        background-color: rgba(175, 175, 175, 0.8);
+      }
+      #logo {
+        width:180px;
+        display:block;
+        margin:auto;
+        margin-top:5px;
+      }
+      /* all links */
+      a {
+        text-decoration: none;
+      }
+      /* unvisited link */
+      a:link {
+        color: rgb(0, 0, 0);
+      }
+      /* visited link */
+      a:visited {
+        color: rgb(110, 110, 110);
+      }
+      /* mouse over link */
+      a:hover {
+        color: rgb(80, 80, 80);
+      }
+      /* selected link */
+      a:active {
+        color: rgb(5, 100, 170);
+      }
     </style>
   </head>
   <body>
   <span id="canvasholder"></span>
-  <div id="sidebar" style="position: absolute; left: 0px; top: 0px; width:250px; height:100vh; background-color: rgba(175, 175, 175, 0.8);" >
-  <img src="./img/wordflow-2.png" width="180px" style="display:block;margin:auto;margin-top:5px;"/>
+  <div id="sidebar">
+  <img id="logo" src="./img/wordflow-2.png"/>
   </div>
-  <div id="infobar" style="position: absolute; left: 10px; top: 400px; width:230px; height: calc(100% - 410px); background-color: rgba(50, 175, 200, 0.2); border-radius: 10px; overflow-y: scroll;" >
+  <div id="infobar"> </div>
   </body>
 </html>
