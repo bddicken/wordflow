@@ -31,24 +31,13 @@ var inputFreq, buttonFreq, greetingFreq;
 // Chapter select
 var selectCh, greetingCh;
 
-// NEW selection info
+// The verses associated with the currently-selected graph node
 var versesForSelected = [];
 
 // Custom pmouseX and pmouseY
 // See mouseDragged function for more details
 var pmouseXCustom = -1;
 var pmouseYCustom = -1;
-
-//var clickForwardPath = "";
-//var clickBackwardPath = "";
-
-/*
-// Infor about the currently-clicked phrase in the graph
-var clickedPhrase = "";
-var clickedPureTextIndexes = [];
-var clickedForward = true;
-var clickedDepth = 0;
-*/
 
 /**
  * GN is the "Graph-Node" class
@@ -207,13 +196,6 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   // handle button press
   if (mouseIsPressed) {
     if (mXA > wsf && mXA < wsf+70 && mYA > hsf-10 && mYA < hsf+10) {
-      /*
-      clickedPhrase = node.phrase;
-      clickedPureTextIndexes = node.pureTextIndexes;
-      clickedForward = (change > 0) ? true : false;
-      clickedDepth = (change > 0) ? depth : -depth;
-      //graphWord = node.phrase;
-      */
       fill(0, 255, 255, 75);
       rect(wsf, hsf-10, 70, 20, 5);
       highlightPath = true;
@@ -262,16 +244,6 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       stroke(130, 130, 130, 150);
     }
 
-/*
-    // determine wether or not to highlight the path green
-    //if (highlightPath || oppositeRoot.checkIfHasPath(clickForwardPath)) {
-    if (highlightpath) {
-      stroke(130, 255, 130, 200);
-    } else {
-      stroke(130, 130, 130, 150);
-    }
-    */
-
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
         bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
@@ -280,37 +252,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
     }
   }
     
-  /*
-  if (highlightPath) {
-    if (clickForwardPath == "") {
-      clickForwardPath = node.phrase;
-    } else {
-      clickForwardPath = node.phrase + " " + clickForwardPath;
-    }
-  }
-  */ 
-
   return highlightPath;
 }
 
-/*
-function nodeIntersectsClicked(node, depth) {
-  // check path highlight NEW
-  for (var i = 0 ; i < clickedPureTextIndexes.length; i++) {
-    var wi = clickedPureTextIndexes[i] + ((-clickedDepth) + depth);
-    //print(clickedPureTextIndexes.length + "===");
-    for (var j = 0 ; j < node.pureTextIndexes.length; j++) {
-      //print(node.pureTextIndexes[j] + "'''" + wi);
-      if (node.pureTextIndexes[j] == wi) {
-
-        return true;
-      }
-    }
-  }
-  return false;
-}
-*/
-  
 var f_root = undefined;
 var b_root = undefined;
 
@@ -449,10 +393,7 @@ function draw() {
     buildData();
   }
   drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 120, b_root);
-  //print("FPA: >" + clickForwardPath + "<")
   drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
-  //print("FPB: >" + clickForwardPath + "<")
-  //clickForwardPath = "";
 } 
 
 function updateWordSearch() {
