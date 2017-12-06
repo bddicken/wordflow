@@ -168,8 +168,12 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   if (node.count < pathFreq) { return false; }
 
   // mouseX and mouseX adjusted for scale and translation
-  var mXA = (mouseX - translateX) * (1/scaleFactor);
-  var mYA = (mouseY - translateY) * (1/scaleFactor);
+  //var mXA = (mouseX - translateX) * (1/scaleFactor);
+  //var mYA = (mouseY - translateY) * (1/scaleFactor);
+  var pan = panZoomCont.getPan();
+  var sc = panZoomCont.getScale();
+  var mXA = (mouseX/sc) - pan.x/sc;
+  var mYA = (mouseY/sc) - pan.y/sc;
 
   var h = getNodeH(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
@@ -433,6 +437,7 @@ function draw() {
   //var mYA = mouseY * scaleFactor;
   //var mXA = mouseX * scaleFactor;
   //var mYA = mouseY * scaleFactor;
+  
   //var mXA = (mouseX / scaleFactor) - (translateX*scaleFactor);
   //var mYA = (mouseY / scaleFactor) - (translateY*scaleFactor);
   //var mXA = mouseX;
@@ -460,6 +465,14 @@ function draw() {
   //print('my = ' + mouseY);
   //print('scaleFacto = ' + scaleFactor);
   rect(0, 0, 100, 100);
+ 
+  // draw cursor
+  //var mXA = (mouseX / scaleFactor);// + (translateX);
+  //var mYA = (mouseY / scaleFactor);// + (translateY);
+  //var mXA = (mouseX/sc) - pan.x/sc;
+  //var mYA = (mouseY/sc) - pan.y/sc;
+  //fill(5, 100, 255);
+  //ellipse(mXA, mYA, 20, 20);
 
   pop();
 } 
