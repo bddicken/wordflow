@@ -1,7 +1,7 @@
 /**
  * @author Benjamin Dicken (bddicken)
  * @credits
- *   The original Java version of this class was written by Bohumir Zamecnik.
+ *   The original Java version of this class was written by Bohumir Zamecnik in Java.
  *   I (Benjamin) translated it to javascript.
  * @license MIT
  *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
