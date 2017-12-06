@@ -1,9 +1,13 @@
 
+var panZoomCont;
 
 // use for translating and scaling with the mouse
 var translateX = 0;
 var translateY = 0;
 var scaleFactor = 1.0;
+
+var zoomMouseX = 0;
+var zoomMouseY = 0;
 
 // The depth of the word flow graph
 var depthLimit = 4;
@@ -180,17 +184,18 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   noStroke();
   fill(150, 250, 255, 255);
   fill(5, 100, 170);
-  rect(wsf, hsf-10, 70, 20, 5);
+  //rect(wsf, hsf-10, 70, 20, 5);
+  rect(w, h-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
   fill(255, 255, 240);
-  text(node.phrase, wsf+(tw/2.0)+2, hsf+4);
+  text(node.phrase, w+(tw/2.0)+2, h+4);
   if (node.count > 1) {
     var nodeTextWidth = textWidth('' + node.count);
     fill(248, 144, 37);
-    ellipse(wsf + 68 - (nodeTextWidth/2), hsf, nodeTextWidth + 5, 15);
+    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, 15);
     fill(0);
-    text(node.count, wsf + 68 - (nodeTextWidth/2), hsf+4);
+    text(node.count, w + 68 - (nodeTextWidth/2), h+4);
   }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
@@ -199,9 +204,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var highlightPath = false;
   // handle button press
   if (mouseIsPressed) {
-    if (mXA > wsf && mXA < wsf+70 && mYA > hsf-10 && mYA < hsf+10) {
+    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+10) {
       fill(0, 255, 255, 75);
-      rect(wsf, hsf-10, 70, 20, 5);
+      rect(w, hsf-10, 70, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
       var infobar = document.getElementById('infobar');
@@ -239,7 +244,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], wsf, hsf, change, oppositeRoot) || highlightPath;
+      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], w, h, change, oppositeRoot) || highlightPath;
     }
   }
   
@@ -264,9 +269,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
-        bezier(wsf, hsf, wsf-40, hsf, prev_x+70+40, prev_y, prev_x+70, prev_y);
+        bezier(w, h, w-40, h, prev_x+70+40, prev_y, prev_x+70, prev_y);
     } else {
-        bezier(wsf+70, hsf, wsf+70+40, hsf, prev_x-40, prev_y, prev_x, prev_y);
+        bezier(w+70, h, w+70+40, h, prev_x-40, prev_y, prev_x, prev_y);
     }
   }
     
@@ -329,6 +334,9 @@ function buildGraphForWord(word, data, increment) {
  * Basic setup
  */
 function setup() {
+  // setup for pan/zoom controller
+  panZoomCont = new PanZoomController();
+
   var cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
   cnv.parent('canvasholder');
@@ -407,8 +415,40 @@ function buildData() {
  * The primary animation loop
  */
 function draw() {
-  translate(translateX, translateY);
-  scale(scaleFactor); 
+  // setup for pan/zoom controller
+  var pan = panZoomCont.getPan();
+  var sc = panZoomCont.getScale();
+
+  push();
+
+  //print("scale = " + scale);
+  translate(pan.x, pan.y);
+  scale(sc);
+  
+  //translate(translateX, translateY);
+
+  //var mXA = zoomMouseX * scaleFactor;
+  //var mYA = zoomMouseY * scaleFactor;
+  //var mXA = mouseX * scaleFactor;
+  //var mYA = mouseY * scaleFactor;
+  //var mXA = mouseX * scaleFactor;
+  //var mYA = mouseY * scaleFactor;
+  //var mXA = (mouseX / scaleFactor) - (translateX*scaleFactor);
+  //var mYA = (mouseY / scaleFactor) - (translateY*scaleFactor);
+  //var mXA = mouseX;
+  //var mYA = mouseY;
+ 
+  //scale(3.0);
+  //translate(100, 0);
+
+  //translate(mXA, mYA);
+  //translate((width*scaleFactor)/2, (height*scaleFactor)/2);
+  //scale(scaleFactor); 
+  //translate(-((width*scaleFactor)/2), -((height*scaleFactor)/2));
+  //scale(5.0);
+  //translate(20, 0);
+  //translate(-(mXA), -(mYA));
+
   background(255);
   if (firstDraw) {
     firstDraw = false;
@@ -416,6 +456,12 @@ function draw() {
   }
   drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 120, b_root);
   drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
+  //print('mx = ' + mouseX);
+  //print('my = ' + mouseY);
+  //print('scaleFacto = ' + scaleFactor);
+  rect(0, 0, 100, 100);
+
+  pop();
 } 
 
 function updateWordSearch() {
@@ -438,16 +484,19 @@ function windowResized() {
  * Use for translating the canvas so that the graph can be moved around..
  */
 function mouseDragged() {
+  panZoomCont.mouseDragged(mouseX, mouseY, pmouseX, pmouseY);
+  /*
   if (pmouseXCustom == -1 && pmouseYCustom == -1) { pmouseXCustom = pmouseX ; pmouseYCustom = pmouseY; }
   if (mouseX < 250) { return; } // Don't move graph when dragging on menu bar
   // For some reason, using the built-in pmouseX and pmouseY to handle dragging of the canvas
   // Does not work properly. Dragging ends up occurring too fast.
   // Had to implement my own pmouseX/pmouseY instead.
   // Maybe this is purposeful, or maybe it's a bug in p5.js that will be addressed in the future.
-  translateX += mouseX - pmouseXCustom;
-  translateY += mouseY - pmouseYCustom;
+  translateX += (mouseX - pmouseXCustom) * scaleFactor;
+  translateY += (mouseY - pmouseYCustom) * scaleFactor;
   pmouseXCustom = mouseX;
   pmouseYCustom = mouseY;
+  */
 }
 
 function mouseReleased() {
@@ -461,15 +510,21 @@ function mouseReleased() {
  * event.delta is the positive/negative distance of the scale.
  */
 function mouseWheel(event) {
+  panZoomCont.mouseWheel(event.delta);
+  /*
   if (mouseX < 250) { return; } // Don't zoom graph when dragging on menu bar
-  translateX -= mouseX;
-  translateY -= mouseY;
   var delta = event.delta > 0 ? 1.02 : event.delta < 0 ? 1.0/1.02 : 1.0;
+  zoomMouseX = mouseX;
+  zoomMouseY = mouseY;
+  
+  //translateX -= mouseX;
+  //translateY -= mouseY;
   scaleFactor *= delta;
-  translateX *= delta;
-  translateY *= delta;
-  translateX += mouseX;
-  translateY += mouseY;
+  //translateX *= delta;
+  //translateY *= delta;
+  //translateX += mouseX;
+  //translateY += mouseY;
   return false;
+  */
 }
 
