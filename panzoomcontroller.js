@@ -1,7 +1,16 @@
 /**
- * @author Bohumir Zamecnik
+ * @author Benjamin Dicken (bddicken)
+ * @credits
+ *   The original Java version of this class was written by Bohumir Zamecnik.
+ *   I (Benjamin) translated it to javascript.
  * @license MIT
- */
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ *   INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ *   PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+ *   FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+ *   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *   DEALINGS IN THE SOFTWARE.
+*/
 
 var DIR_UP = new p5.Vector(0, -1);
 var DIR_DOWN = new p5.Vector(0, 1);
@@ -21,9 +30,11 @@ class PanZoomController {
     //this.p;
   }
 
-  //public PanZoomController(PApplet p) {
-  //  this.p = p;
-  //}
+/*
+  public PanZoomController(PApplet p) {
+    this.p = p;
+  }
+*/
 
   mouseDragged(mouseX, mouseY, pmouseX, pmouseY) {
     var mouse = new p5.Vector(mouseX, mouseY);
@@ -103,6 +114,3 @@ class PanZoomController {
   }
 }
 
-/*
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/

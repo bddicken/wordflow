@@ -1,10 +1,10 @@
-
-var panZoomCont;
+/**
+ * @author Benjamin Dicken (bddicken)
+ * @description The primary source file for drawing the wordflow graph and UI.
+ */
 
 // use for translating and scaling with the mouse
-var translateX = 0;
-var translateY = 0;
-var scaleFactor = 1.0;
+var panZoomCont;
 
 var zoomMouseX = 0;
 var zoomMouseY = 0;
@@ -167,19 +167,14 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   if (node == undefined) { return false; }
   if (node.count < pathFreq) { return false; }
 
-  // mouseX and mouseX adjusted for scale and translation
-  //var mXA = (mouseX - translateX) * (1/scaleFactor);
-  //var mYA = (mouseY - translateY) * (1/scaleFactor);
   var pan = panZoomCont.getPan();
   var sc = panZoomCont.getScale();
+  // mouseX and mouseX adjusted for scale and translation
   var mXA = (mouseX/sc) - pan.x/sc;
   var mYA = (mouseY/sc) - pan.y/sc;
 
   var h = getNodeH(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
-  var sf = scaleFactor;
-  var wsf = w*sf;
-  var hsf = h*sf;
   
   fill(0, 0, 0, 255);
 
@@ -188,7 +183,6 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   noStroke();
   fill(150, 250, 255, 255);
   fill(5, 100, 170);
-  //rect(wsf, hsf-10, 70, 20, 5);
   rect(w, h-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
@@ -210,7 +204,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   if (mouseIsPressed) {
     if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+10) {
       fill(0, 255, 255, 75);
-      rect(w, hsf-10, 70, 20, 5);
+      rect(w, h-10, 70, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
       var infobar = document.getElementById('infobar');
@@ -425,35 +419,9 @@ function draw() {
 
   push();
 
-  //print("scale = " + scale);
   translate(pan.x, pan.y);
   scale(sc);
   
-  //translate(translateX, translateY);
-
-  //var mXA = zoomMouseX * scaleFactor;
-  //var mYA = zoomMouseY * scaleFactor;
-  //var mXA = mouseX * scaleFactor;
-  //var mYA = mouseY * scaleFactor;
-  //var mXA = mouseX * scaleFactor;
-  //var mYA = mouseY * scaleFactor;
-  
-  //var mXA = (mouseX / scaleFactor) - (translateX*scaleFactor);
-  //var mYA = (mouseY / scaleFactor) - (translateY*scaleFactor);
-  //var mXA = mouseX;
-  //var mYA = mouseY;
- 
-  //scale(3.0);
-  //translate(100, 0);
-
-  //translate(mXA, mYA);
-  //translate((width*scaleFactor)/2, (height*scaleFactor)/2);
-  //scale(scaleFactor); 
-  //translate(-((width*scaleFactor)/2), -((height*scaleFactor)/2));
-  //scale(5.0);
-  //translate(20, 0);
-  //translate(-(mXA), -(mYA));
-
   background(255);
   if (firstDraw) {
     firstDraw = false;
@@ -461,19 +429,7 @@ function draw() {
   }
   drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 120, b_root);
   drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
-  //print('mx = ' + mouseX);
-  //print('my = ' + mouseY);
-  //print('scaleFacto = ' + scaleFactor);
-  rect(0, 0, 100, 100);
  
-  // draw cursor
-  //var mXA = (mouseX / scaleFactor);// + (translateX);
-  //var mYA = (mouseY / scaleFactor);// + (translateY);
-  //var mXA = (mouseX/sc) - pan.x/sc;
-  //var mYA = (mouseY/sc) - pan.y/sc;
-  //fill(5, 100, 255);
-  //ellipse(mXA, mYA, 20, 20);
-
   pop();
 } 
 
@@ -498,18 +454,6 @@ function windowResized() {
  */
 function mouseDragged() {
   panZoomCont.mouseDragged(mouseX, mouseY, pmouseX, pmouseY);
-  /*
-  if (pmouseXCustom == -1 && pmouseYCustom == -1) { pmouseXCustom = pmouseX ; pmouseYCustom = pmouseY; }
-  if (mouseX < 250) { return; } // Don't move graph when dragging on menu bar
-  // For some reason, using the built-in pmouseX and pmouseY to handle dragging of the canvas
-  // Does not work properly. Dragging ends up occurring too fast.
-  // Had to implement my own pmouseX/pmouseY instead.
-  // Maybe this is purposeful, or maybe it's a bug in p5.js that will be addressed in the future.
-  translateX += (mouseX - pmouseXCustom) * scaleFactor;
-  translateY += (mouseY - pmouseYCustom) * scaleFactor;
-  pmouseXCustom = mouseX;
-  pmouseYCustom = mouseY;
-  */
 }
 
 function mouseReleased() {
@@ -524,20 +468,5 @@ function mouseReleased() {
  */
 function mouseWheel(event) {
   panZoomCont.mouseWheel(event.delta);
-  /*
-  if (mouseX < 250) { return; } // Don't zoom graph when dragging on menu bar
-  var delta = event.delta > 0 ? 1.02 : event.delta < 0 ? 1.0/1.02 : 1.0;
-  zoomMouseX = mouseX;
-  zoomMouseY = mouseY;
-  
-  //translateX -= mouseX;
-  //translateY -= mouseY;
-  scaleFactor *= delta;
-  //translateX *= delta;
-  //translateY *= delta;
-  //translateX += mouseX;
-  //translateY += mouseY;
-  return false;
-  */
 }
 
