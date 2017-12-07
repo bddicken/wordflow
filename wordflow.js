@@ -158,6 +158,16 @@ function processData(data, chapter) {
 function getNodeH(tl, bl) {
   return tl + ((bl - tl)/2.0);
 }
+    
+function nodeIsOnHighlightPath(node) {
+  // check path highlight NEW
+  for (var i = 0; i < node.verses.length; i++) {
+    if (versesForSelected.indexOf(node.verses[i]) > -1) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Recursive function to draw the tree
@@ -165,7 +175,8 @@ function getNodeH(tl, bl) {
 function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change, oppositeRoot) {
 
   if (node == undefined) { return false; }
-  if (node.count < pathFreq) { return false; }
+  var isOnHPath = nodeIsOnHighlightPath(node);
+  if (node.count < pathFreq && !isOnHPath) { return false; }
 
   var pan = panZoomCont.getPan();
   var sc = panZoomCont.getScale();
@@ -182,7 +193,12 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   stroke(0);
   noStroke();
   fill(150, 250, 255, 255);
-  fill(5, 100, 170);
+  // color differently if on highlight path
+  if (isOnHPath) {
+    fill(5, 130, 210);
+  } else {
+    fill(5, 100, 170);
+  }
   rect(w, h-10, 70, 20, 5);
   fill(0, 0, 0, 255);
   noStroke();
@@ -251,15 +267,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   if (depth != 0) {
     strokeWeight(3);
 
-    // check path highlight NEW
-    //var hl = nodeIntersectsClicked(node, depth);
-    var hl = false;
-    for (var i = 0; i < node.verses.length; i++) {
-      if (versesForSelected.indexOf(node.verses[i]) > -1) {
-        hl = true;
-      }
-    }
-    if (hl || highlightPath) {
+    if (isOnHPath || highlightPath) {
       stroke(130, 255, 130, 200);
     } else {
       stroke(130, 130, 130, 150);
