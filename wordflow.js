@@ -179,16 +179,17 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   if (node.count < pathFreq && !isOnHPath) { return false; }
 
   var pan = panZoomCont.getPan();
+  // sc, short for "scale"
   var sc = panZoomCont.getScale();
   // mouseX and mouseX adjusted for scale and translation
   var mXA = (mouseX/sc) - pan.x/sc;
   var mYA = (mouseY/sc) - pan.y/sc;
-
+  // h, short for "height"
   var h = getNodeH(top_limit, bot_limit);
-  var tw = textWidth(node.phrase);
-  var csc = (20/sc);
-  var ce = (csc)/2;
-  var ts = 13/sc;
+  var textW = textWidth(node.phrase);
+  var nodeRectHeight = (20/sc);
+  var halfRectHeight = (nodeRectHeight)/2;
+  var scaledTextSize = 13/sc;
   
   fill(0, 0, 0, 255);
 
@@ -202,18 +203,18 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   } else {
     fill(5, 100, 170);
   }
-  rect(w, h-ce, 70, csc, 5);
+  rect(w, h-halfRectHeight, 70, nodeRectHeight, 5);
   fill(0, 0, 0, 255);
   noStroke();
   fill(255, 255, 240);
-  textSize(ts);
-  text(node.phrase, w+(tw/2.0)+2, h+ts-ce);
+  textSize(scaledTextSize);
+  text(node.phrase, w+(textW/2.0)+2, h+scaledTextSize-halfRectHeight);
   if (node.count > 1) {
     var nodeTextWidth = textWidth('' + node.count) - 2;
     fill(248, 144, 37);
-    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, csc);
+    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, nodeRectHeight);
     fill(0);
-    text(node.count, w + 68 - (nodeTextWidth/2), h+ts-ce);
+    text(node.count, w + 68 - (nodeTextWidth/2), h+scaledTextSize-halfRectHeight);
   }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
@@ -222,9 +223,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var highlightPath = false;
   // handle button press
   if (mouseIsPressed) {
-    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+csc) {
+    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+nodeRectHeight) {
       fill(0, 255, 255, 75);
-      rect(w, h-ce, 70, csc, 5);
+      rect(w, h-halfRectHeight, 70, nodeRectHeight, 5);
       //rect(w, h-10, 70, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
