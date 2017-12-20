@@ -26,7 +26,7 @@ var firstDraw = true;
 var graphWord = 'Jesus';
 
 // The default value for path frequency occurence threshold
-var pathFreq = 3;
+var pathFreq = 2;
 
 // Word input
 var input, button, greeting;
@@ -186,6 +186,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 
   var h = getNodeH(top_limit, bot_limit);
   var tw = textWidth(node.phrase);
+  var csc = (20/sc);
+  var ce = (csc)/2;
+  var ts = 13/sc;
   
   fill(0, 0, 0, 255);
 
@@ -199,17 +202,18 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   } else {
     fill(5, 100, 170);
   }
-  rect(w, h-10, 70, 20, 5);
+  rect(w, h-ce, 70, csc, 5);
   fill(0, 0, 0, 255);
   noStroke();
   fill(255, 255, 240);
-  text(node.phrase, w+(tw/2.0)+2, h+4);
+  textSize(ts);
+  text(node.phrase, w+(tw/2.0)+2, h+ts-ce);
   if (node.count > 1) {
-    var nodeTextWidth = textWidth('' + node.count);
+    var nodeTextWidth = textWidth('' + node.count) - 2;
     fill(248, 144, 37);
-    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, 15);
+    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, csc);
     fill(0);
-    text(node.count, w + 68 - (nodeTextWidth/2), h+4);
+    text(node.count, w + 68 - (nodeTextWidth/2), h+ts-ce);
   }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
@@ -218,9 +222,10 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var highlightPath = false;
   // handle button press
   if (mouseIsPressed) {
-    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+10) {
+    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+csc) {
       fill(0, 255, 255, 75);
-      rect(w, h-10, 70, 20, 5);
+      rect(w, h-ce, 70, csc, 5);
+      //rect(w, h-10, 70, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
       var infobar = document.getElementById('infobar');
@@ -265,7 +270,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   // draw connector
   fill(0, 0, 0, 0);
   if (depth != 0) {
-    strokeWeight(3);
+    strokeWeight(2/sc);
 
     if (isOnHPath || highlightPath) {
       stroke(130, 255, 130, 200);
