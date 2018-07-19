@@ -23,15 +23,14 @@ var sidebarWidth = 250;
 //var result;
 var bible;
 var biblePureText = undefined;
-var chapter = 'Matthew'
+var chapter = 'Psalm'
 
 // Set to false after draw is entered for the first time
 var firstDraw = true;
 
-// The word to generate graph for
+// The words to use at the root for the graph
 // Eventually, this should be replaced with a user-input value
-var graphRootWords = ['Jesus'];
-//var graphRootWords = ['Jesus', 'answered'];
+var graphRootWords = ['Jehovah', 'is'];
 
 // The default value for path frequency occurrence threshold
 var pathFreq = 2;
@@ -180,7 +179,7 @@ function nodeIsOnHighlightPath(node) {
 /**
  * Recursive function to draw the tree
  */
-function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, change, oppositeRoot) {
+function drawWordTree(depth, top_limit, bot_limit, nodeX, node, prevX, prevY, change, oppositeRoot, prevRectW) {
 
   if (node == undefined) { return false; }
   var isOnHPath = nodeIsOnHighlightPath(node);
@@ -194,10 +193,12 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var mYA = (mouseY/sc) - pan.y/sc;
   // h, short for "height"
   var h = getNodeH(top_limit, bot_limit);
-  var textW = textWidth(node.phrase);
   var nodeRectHeight = (20/sc);
   var halfRectHeight = (nodeRectHeight)/2;
   var scaledTextSize = 13/sc;
+  textSize(scaledTextSize);
+  var textW = textWidth(node.phrase);
+  var rectW = textW + 25;
   
   fill(0, 0, 0, 255);
 
@@ -211,18 +212,17 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   } else {
     fill(5, 100, 170);
   }
-  rect(w, h-halfRectHeight, 70, nodeRectHeight, 5);
+  rect(nodeX, h-halfRectHeight, rectW, nodeRectHeight, 5);
   fill(0, 0, 0, 255);
   noStroke();
   fill(255, 255, 240);
-  textSize(scaledTextSize);
-  text(node.phrase, w+(textW/2.0)+2, h+scaledTextSize-halfRectHeight);
+  text(node.phrase, nodeX+(textW/2.0)+2, h+scaledTextSize-halfRectHeight);
   if (node.count > 1) {
     var nodeTextWidth = textWidth('' + node.count) - 2;
     fill(248, 144, 37);
-    ellipse(w + 68 - (nodeTextWidth/2), h, nodeTextWidth + 5, nodeRectHeight);
+    ellipse(nodeX + (rectW - 2) - (nodeTextWidth/2), h, nodeTextWidth + 5, nodeRectHeight);
     fill(0);
-    text(node.count, w + 68 - (nodeTextWidth/2), h+scaledTextSize-halfRectHeight);
+    text(node.count, nodeX + (rectW - 2) - (nodeTextWidth/2), h+scaledTextSize-halfRectHeight);
   }
   //print("  ".repeat(depth) + "dwh = " + depth + "   " + w + " " + h);
   //print("  ".repeat(depth) + "tb = " + top_limit + " " + bot_limit);
@@ -231,11 +231,11 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
   var highlightPath = false;
   // handle button press
   if (shouldUpdateSelectedNode) {
-    if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+nodeRectHeight) {
+    if (mXA > nodeX && mXA < nodeX+rectW && mYA > h-10 && mYA < h+nodeRectHeight) {
       shouldUpdateSelectedNode = false;
       fill(0, 255, 255, 75);
-      rect(w, h-halfRectHeight, 70, nodeRectHeight, 5);
-      //rect(w, h-10, 70, 20, 5);
+      rect(nodeX, h-halfRectHeight, rectW, nodeRectHeight, 5);
+      //rect(w, h-10, rectW, 20, 5);
       highlightPath = true;
       versesForSelected = node.verses;
       var infobar = document.getElementById('infobar');
@@ -273,7 +273,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
       var size = ((bot_limit - top_limit) / ntc);
       var nbl = top_limit + (size * (i+1));
       var ntl = top_limit + (size * i);
-      highlightPath = drawWordTree(depth+1, ntl, nbl, w + change, childrenToTraverse[i], w, h, change, oppositeRoot) || highlightPath;
+      highlightPath = drawWordTree(depth+1, ntl, nbl, nodeX + ((rectW + 50) * change), childrenToTraverse[i], nodeX, h, change, oppositeRoot, rectW) || highlightPath;
     }
   }
   
@@ -290,9 +290,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 
     // draw a bezier curve, but modify depending on forwards or backwards display
     if (change > 0) {
-        bezier(w, h, w-40, h, prev_x+70+40, prev_y, prev_x+70, prev_y);
+        bezier(nodeX, h, nodeX-40, h, prevX+prevRectW+40, prevY, prevX+prevRectW, prevY);
     } else {
-        bezier(w+70, h, w+70+40, h, prev_x-40, prev_y, prev_x, prev_y);
+        bezier(nodeX+rectW, h, nodeX+rectW+40, h, prevX-40, prevY, prevX, prevY);
     }
   }
     
@@ -335,7 +335,7 @@ function buildGraphForWordRecursive(words, data, index, depth, graph, increment)
 
 function isWordSequenceAtDataLocation(wordSequence, data, dataIndex) {
   for (var i = 0; i < wordSequence.length ; i++) {
-    if (wordSequence[i] != data[dataIndex + i]) {
+    if (wordSequence[i] != data[dataIndex + i][1]) {
         return false;
     }
   }
@@ -348,16 +348,10 @@ function isWordSequenceAtDataLocation(wordSequence, data, dataIndex) {
 function buildGraphForWord(words, data, increment) {
   var matching_indexes = [];
   for (var i = 0 ; i < data.length ; i++) {
-    if (increment == 1) {
-      if (data[i][1] == words[words.length-1]) {
+    if (data[i][1] == words[0]) {
+      if ( isWordSequenceAtDataLocation(words, data, i) ) {
         matching_indexes.push(i);
       }
-    } else if (increment == -1) {
-      if (data[i][1] == words[0]) {
-        matching_indexes.push(i);
-      }
-    } else {
-      console.log('NOOOOOOOOOOOOOOOO')
     }
   }
 
@@ -440,7 +434,7 @@ function setup() {
   buttonFreq.position(input.x + input.width, 315);
   buttonFreq.mousePressed(updateWordSearch);
   buttonFreq.parent('sidebar');
-  greetingFreq = createElement('h3', 'Max path freqency');
+  greetingFreq = createElement('h3', 'Min path freqency');
   greetingFreq.position(10, 265);
   greetingFreq.parent('sidebar');
   
@@ -475,8 +469,8 @@ function draw() {
     firstDraw = false;
     buildData();
   }
-  drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 120, b_root);
-  drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -120, f_root);
+  drawWordTree(0, 0, height+7, width/2-30+100, f_root, 20, height/2, 1, b_root, 0);
+  drawWordTree(0, 0, height+7, width/2-30+100, b_root, 20, height/2, -1, f_root, 0);
  
   pop();
 } 
@@ -484,7 +478,7 @@ function draw() {
 function updateWordSearch() {
   pathFreq = int(inputFreq.value());
   chapter = selectCh.value();
-  graphWord = input.value();
+  graphRootWords = input.value().split(' ');
   depthLimit = int(inputDepth.value());
   buildData();
 }
@@ -507,6 +501,7 @@ function mouseDragged() {
 function mouseReleased() {
   pmouseXCustom = -1;
   pmouseYCustom = -1;
+  shouldUpdateSelectedNode = false;
 }
 
 /**
@@ -520,10 +515,11 @@ function mouseWheel(event) {
   }
 }
 
-var countMP = 0;
+/**
+ * This function is implemented to help with node selection.
+ */
 function mousePressed() {
-  console.log('MP ' + countMP);
-  countMP += 1;
   shouldUpdateSelectedNode = true;
+  return false;
 }
 
