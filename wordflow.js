@@ -30,7 +30,8 @@ var firstDraw = true;
 
 // The word to generate graph for
 // Eventually, this should be replaced with a user-input value
-var graphWord = 'Jesus';
+var graphRootWords = ['Jesus'];
+//var graphRootWords = ['Jesus', 'answered'];
 
 // The default value for path frequency occurrence threshold
 var pathFreq = 2;
@@ -301,12 +302,12 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 var f_root = undefined;
 var b_root = undefined;
 
-function buildGraphForWordRecursive(word, data, index, depth, graph, increment) {
+function buildGraphForWordRecursive(words, data, index, depth, graph, increment) {
   
   // recursive base-cases
-  if (depth >= depthLimit) { return; }
   if (data.length <= index+increment) { return; }
-  if (0 > index+increment) { return; }
+  if (depth >= depthLimit)            { return; }
+  if (0 > index+increment)            { return; }
 
   // find existing or create new node and add to graph
   var verse = data[index+increment][0];
@@ -327,22 +328,47 @@ function buildGraphForWordRecursive(word, data, index, depth, graph, increment) 
   }
   nn.addVerse(verse);
   nn.addPureTextIndex(index+increment);
-
+  
   // recurse
   buildGraphForWordRecursive(nn.phrase, data, index+increment, depth + 1, nn, increment);
+}
+
+function isWordSequenceAtDataLocation(wordSequence, data, dataIndex) {
+  for (var i = 0; i < wordSequence.length ; i++) {
+    if (wordSequence[i] != data[dataIndex + i]) {
+        return false;
+    }
+  }
+  return true;
 }
 
 /**
  * graph is an out-param
  */
-function buildGraphForWord(word, data, increment) {
+function buildGraphForWord(words, data, increment) {
   var matching_indexes = [];
   for (var i = 0 ; i < data.length ; i++) {
-    if (data[i][1] == word) { matching_indexes.push(i); }
+    if (increment == 1) {
+      if (data[i][1] == words[words.length-1]) {
+        matching_indexes.push(i);
+      }
+    } else if (increment == -1) {
+      if (data[i][1] == words[0]) {
+        matching_indexes.push(i);
+      }
+    } else {
+      console.log('NOOOOOOOOOOOOOOOO')
+    }
   }
-  var root = new GN(undefined, word, 3);
+
+  var indexOffset = 0;
+  if (increment == 1) {
+    indexOffset =  words.length-1;
+  }
+
+  var root = new GN(undefined, words.join(' '), 3);
   for (var i = 0 ; i < matching_indexes.length ; i++) {
-    buildGraphForWordRecursive(word, data, matching_indexes[i], 0, root, increment);
+    buildGraphForWordRecursive(words, data, matching_indexes[i] + indexOffset, 0, root, increment);
     root.addPureTextIndex(matching_indexes[i]);
     var verse = data[matching_indexes[i]][0];
     root.addVerse(verse);
@@ -365,7 +391,7 @@ function setup() {
   
   // Input word button
   textSize(12);
-  input = createInput(graphWord);
+  input = createInput(graphRootWords.join(' '));
   input.position(10, 100);
   input.parent('sidebar');
   button = createButton('update');
@@ -427,8 +453,8 @@ function setup() {
 
 function buildData() {
   biblePureText = processData(bible, chapter);
-  f_root = buildGraphForWord(graphWord, biblePureText, 1);
-  b_root = buildGraphForWord(graphWord, biblePureText, -1);
+  f_root = buildGraphForWord(graphRootWords, biblePureText, 1);
+  b_root = buildGraphForWord(graphRootWords, biblePureText, -1);
 }
 
 /**
