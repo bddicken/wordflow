@@ -9,13 +9,17 @@ var panZoomCont;
 var zoomMouseX = 0;
 var zoomMouseY = 0;
 
+// True if the mouse has been clicked, and thus the selected node on the
+// graph should be (potentially) updated).
+var shouldUpdateSelectedNode = false;
+
 // The depth of the word flow graph
 var depthLimit = 4;
 
 // The width of the sidebar
 var sidebarWidth = 250;
 
-// Where the taxt data is read in and stored
+// Where the text data is read in and stored
 //var result;
 var bible;
 var biblePureText = undefined;
@@ -28,7 +32,7 @@ var firstDraw = true;
 // Eventually, this should be replaced with a user-input value
 var graphWord = 'Jesus';
 
-// The default value for path frequency occurence threshold
+// The default value for path frequency occurrence threshold
 var pathFreq = 2;
 
 // Word input
@@ -225,8 +229,9 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 
   var highlightPath = false;
   // handle button press
-  if (mouseIsPressed) {
+  if (shouldUpdateSelectedNode) {
     if (mXA > w && mXA < w+70 && mYA > h-10 && mYA < h+nodeRectHeight) {
+      shouldUpdateSelectedNode = false;
       fill(0, 255, 255, 75);
       rect(w, h-halfRectHeight, 70, nodeRectHeight, 5);
       //rect(w, h-10, 70, 20, 5);
@@ -253,7 +258,7 @@ function drawWordTree(depth, top_limit, bot_limit, w, node, prev_x, prev_y, chan
 
   if (node!= undefined && node.children != undefined && nc > 0) {
 
-    // Figure out how many children need to be traversed, based on the frequency threshold
+    // Figure out which children need to be traversed, based on the frequency threshold
     var childrenToTraverse = []
     for (var i = 0; i < nc; i++) {
       if (node.children[i] != undefined && node.children[i].count >= pathFreq) { 
@@ -487,5 +492,12 @@ function mouseWheel(event) {
   if (mouseX > sidebarWidth) {
     panZoomCont.mouseWheel(event.delta);
   }
+}
+
+var countMP = 0;
+function mousePressed() {
+  console.log('MP ' + countMP);
+  countMP += 1;
+  shouldUpdateSelectedNode = true;
 }
 
