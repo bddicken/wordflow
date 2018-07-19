@@ -12,6 +12,9 @@ var zoomMouseY = 0;
 // The depth of the word flow graph
 var depthLimit = 4;
 
+// The width of the sidebar
+var sidebarWidth = 250;
+
 // Where the taxt data is read in and stored
 //var result;
 var bible;
@@ -481,6 +484,8 @@ function mouseReleased() {
  * event.delta is the positive/negative distance of the scale.
  */
 function mouseWheel(event) {
-  panZoomCont.mouseWheel(event.delta);
+  if (mouseX > sidebarWidth) {
+    panZoomCont.mouseWheel(event.delta);
+  }
 }
 
