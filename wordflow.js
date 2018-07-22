@@ -520,6 +520,5 @@ function mouseWheel(event) {
  */
 function mousePressed() {
   shouldUpdateSelectedNode = true;
-  return false;
 }
 
